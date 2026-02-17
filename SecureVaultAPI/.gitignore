@@ -1,0 +1,4 @@
+test_vault.db
+.env
+venv/
+__pycache__/

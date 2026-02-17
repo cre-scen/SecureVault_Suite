@@ -1,0 +1,275 @@
+--- Log File Initialized ---
+2026-02-17 11:27:05,368 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-02-17 11:27:05,369 - [33mPress CTRL+C to quit[0m
+2026-02-17 11:27:05,374 -  * Restarting with stat
+2026-02-17 11:27:05,976 -  * Debugger is active!
+2026-02-17 11:27:05,989 -  * Debugger PIN: 318-782-099
+2026-02-17 11:27:23,910 - 127.0.0.1 - - [17/Feb/2026 11:27:23] "[33mGET /login HTTP/1.1[0m" 404 -
+2026-02-17 11:27:23,961 - 127.0.0.1 - - [17/Feb/2026 11:27:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:27:26,991 - 127.0.0.1 - - [17/Feb/2026 11:27:26] "[33mGET /login HTTP/1.1[0m" 404 -
+2026-02-17 11:27:36,106 - 127.0.0.1 - - [17/Feb/2026 11:27:36] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:27:38,087 - 127.0.0.1 - - [17/Feb/2026 11:27:38] "GET / HTTP/1.1" 200 -
+2026-02-17 11:27:38,121 - 127.0.0.1 - - [17/Feb/2026 11:27:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:28:45,922 - 127.0.0.1 - - [17/Feb/2026 11:28:45] "[33mPOST /login HTTP/1.1[0m" 404 -
+2026-02-17 11:35:56,214 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-02-17 11:35:56,214 - [33mPress CTRL+C to quit[0m
+2026-02-17 11:35:56,216 -  * Restarting with stat
+2026-02-17 11:35:57,022 -  * Debugger is active!
+2026-02-17 11:35:57,027 -  * Debugger PIN: 318-782-099
+2026-02-17 11:36:38,190 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:36:38,191 - 127.0.0.1 - - [17/Feb/2026 11:36:38] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:36:38,247 - 127.0.0.1 - - [17/Feb/2026 11:36:38] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:09,637 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:09,638 - 127.0.0.1 - - [17/Feb/2026 11:37:09] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:09,662 - 127.0.0.1 - - [17/Feb/2026 11:37:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:11,264 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:11,264 - 127.0.0.1 - - [17/Feb/2026 11:37:11] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:11,289 - 127.0.0.1 - - [17/Feb/2026 11:37:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:12,502 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:12,502 - 127.0.0.1 - - [17/Feb/2026 11:37:12] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:12,533 - 127.0.0.1 - - [17/Feb/2026 11:37:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:12,863 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:12,863 - 127.0.0.1 - - [17/Feb/2026 11:37:12] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:12,898 - 127.0.0.1 - - [17/Feb/2026 11:37:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:13,335 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:13,335 - 127.0.0.1 - - [17/Feb/2026 11:37:13] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:13,359 - 127.0.0.1 - - [17/Feb/2026 11:37:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:13,582 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:13,582 - 127.0.0.1 - - [17/Feb/2026 11:37:13] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:13,615 - 127.0.0.1 - - [17/Feb/2026 11:37:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:13,812 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:13,812 - 127.0.0.1 - - [17/Feb/2026 11:37:13] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:13,844 - 127.0.0.1 - - [17/Feb/2026 11:37:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:14,064 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:14,064 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:14,102 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:14,285 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:14,286 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:14,333 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:14,524 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:14,524 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:14,573 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:14,748 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:14,750 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:14,814 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:37:14,951 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:37:14,951 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:37:14,992 - 127.0.0.1 - - [17/Feb/2026 11:37:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:21,450 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:21,450 - 127.0.0.1 - - [17/Feb/2026 11:38:21] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:21,488 - 127.0.0.1 - - [17/Feb/2026 11:38:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:22,201 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:22,201 - 127.0.0.1 - - [17/Feb/2026 11:38:22] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:22,230 - 127.0.0.1 - - [17/Feb/2026 11:38:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:23,027 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:23,028 - 127.0.0.1 - - [17/Feb/2026 11:38:23] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:23,052 - 127.0.0.1 - - [17/Feb/2026 11:38:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:23,587 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:23,587 - 127.0.0.1 - - [17/Feb/2026 11:38:23] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:23,619 - 127.0.0.1 - - [17/Feb/2026 11:38:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:24,197 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:24,197 - 127.0.0.1 - - [17/Feb/2026 11:38:24] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:24,220 - 127.0.0.1 - - [17/Feb/2026 11:38:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:24,766 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:24,767 - 127.0.0.1 - - [17/Feb/2026 11:38:24] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:24,826 - 127.0.0.1 - - [17/Feb/2026 11:38:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:25,880 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:25,880 - 127.0.0.1 - - [17/Feb/2026 11:38:25] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:25,908 - 127.0.0.1 - - [17/Feb/2026 11:38:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:26,756 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:26,757 - 127.0.0.1 - - [17/Feb/2026 11:38:26] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:26,783 - 127.0.0.1 - - [17/Feb/2026 11:38:26] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:28,128 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:28,129 - 127.0.0.1 - - [17/Feb/2026 11:38:28] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:28,151 - 127.0.0.1 - - [17/Feb/2026 11:38:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:28,876 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:28,877 - 127.0.0.1 - - [17/Feb/2026 11:38:28] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:28,900 - 127.0.0.1 - - [17/Feb/2026 11:38:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:29,597 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:29,597 - 127.0.0.1 - - [17/Feb/2026 11:38:29] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:29,619 - 127.0.0.1 - - [17/Feb/2026 11:38:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:30,181 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:30,182 - 127.0.0.1 - - [17/Feb/2026 11:38:30] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:30,203 - 127.0.0.1 - - [17/Feb/2026 11:38:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:30,686 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:30,687 - 127.0.0.1 - - [17/Feb/2026 11:38:30] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:30,726 - 127.0.0.1 - - [17/Feb/2026 11:38:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:31,116 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:31,116 - 127.0.0.1 - - [17/Feb/2026 11:38:31] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:31,153 - 127.0.0.1 - - [17/Feb/2026 11:38:31] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:31,465 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:31,465 - 127.0.0.1 - - [17/Feb/2026 11:38:31] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:31,503 - 127.0.0.1 - - [17/Feb/2026 11:38:31] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:31,830 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:31,831 - 127.0.0.1 - - [17/Feb/2026 11:38:31] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:31,867 - 127.0.0.1 - - [17/Feb/2026 11:38:31] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:32,169 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:32,169 - 127.0.0.1 - - [17/Feb/2026 11:38:32] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:32,208 - 127.0.0.1 - - [17/Feb/2026 11:38:32] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:32,483 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:32,484 - 127.0.0.1 - - [17/Feb/2026 11:38:32] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:32,517 - 127.0.0.1 - - [17/Feb/2026 11:38:32] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:32,781 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:32,781 - 127.0.0.1 - - [17/Feb/2026 11:38:32] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:32,818 - 127.0.0.1 - - [17/Feb/2026 11:38:32] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:33,153 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:33,154 - 127.0.0.1 - - [17/Feb/2026 11:38:33] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:33,181 - 127.0.0.1 - - [17/Feb/2026 11:38:33] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:35,427 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:35,427 - 127.0.0.1 - - [17/Feb/2026 11:38:35] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:35,456 - 127.0.0.1 - - [17/Feb/2026 11:38:35] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 11:38:37,710 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 11:38:37,710 - 127.0.0.1 - - [17/Feb/2026 11:38:37] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 11:38:37,759 - 127.0.0.1 - - [17/Feb/2026 11:38:37] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:55:35,922 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:55:35,926 - 127.0.0.1 - - [17/Feb/2026 22:55:35] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:55:36,005 - 127.0.0.1 - - [17/Feb/2026 22:55:36] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:02,109 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:02,109 - 127.0.0.1 - - [17/Feb/2026 22:56:02] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:02,167 - 127.0.0.1 - - [17/Feb/2026 22:56:02] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:09,425 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:09,426 - 127.0.0.1 - - [17/Feb/2026 22:56:09] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:09,474 - 127.0.0.1 - - [17/Feb/2026 22:56:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:16,702 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:16,702 - 127.0.0.1 - - [17/Feb/2026 22:56:16] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:16,743 - 127.0.0.1 - - [17/Feb/2026 22:56:16] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:17,624 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:17,625 - 127.0.0.1 - - [17/Feb/2026 22:56:17] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:17,668 - 127.0.0.1 - - [17/Feb/2026 22:56:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:18,115 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:18,115 - 127.0.0.1 - - [17/Feb/2026 22:56:18] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:18,172 - 127.0.0.1 - - [17/Feb/2026 22:56:18] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:18,672 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:18,673 - 127.0.0.1 - - [17/Feb/2026 22:56:18] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:18,740 - 127.0.0.1 - - [17/Feb/2026 22:56:18] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:19,068 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:19,069 - 127.0.0.1 - - [17/Feb/2026 22:56:19] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:19,119 - 127.0.0.1 - - [17/Feb/2026 22:56:19] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:19,553 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:19,555 - 127.0.0.1 - - [17/Feb/2026 22:56:19] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:19,608 - 127.0.0.1 - - [17/Feb/2026 22:56:19] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:20,038 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:20,039 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:20,093 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:20,327 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:20,328 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:20,375 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:20,542 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:20,544 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:20,593 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:56:20,833 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:56:20,834 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:56:20,878 - 127.0.0.1 - - [17/Feb/2026 22:56:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:40,428 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:40,429 - 127.0.0.1 - - [17/Feb/2026 22:57:40] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:40,473 - 127.0.0.1 - - [17/Feb/2026 22:57:40] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:40,869 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:40,870 - 127.0.0.1 - - [17/Feb/2026 22:57:40] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:40,924 - 127.0.0.1 - - [17/Feb/2026 22:57:40] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:41,267 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:41,267 - 127.0.0.1 - - [17/Feb/2026 22:57:41] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:41,322 - 127.0.0.1 - - [17/Feb/2026 22:57:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:41,619 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:41,621 - 127.0.0.1 - - [17/Feb/2026 22:57:41] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:41,681 - 127.0.0.1 - - [17/Feb/2026 22:57:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:42,048 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:42,049 - 127.0.0.1 - - [17/Feb/2026 22:57:42] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:42,092 - 127.0.0.1 - - [17/Feb/2026 22:57:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:42,413 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:42,414 - 127.0.0.1 - - [17/Feb/2026 22:57:42] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:42,475 - 127.0.0.1 - - [17/Feb/2026 22:57:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:42,787 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:42,788 - 127.0.0.1 - - [17/Feb/2026 22:57:42] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:42,832 - 127.0.0.1 - - [17/Feb/2026 22:57:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:43,127 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:43,128 - 127.0.0.1 - - [17/Feb/2026 22:57:43] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:43,168 - 127.0.0.1 - - [17/Feb/2026 22:57:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:43,509 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:43,510 - 127.0.0.1 - - [17/Feb/2026 22:57:43] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:43,551 - 127.0.0.1 - - [17/Feb/2026 22:57:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:43,884 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:43,885 - 127.0.0.1 - - [17/Feb/2026 22:57:43] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:43,939 - 127.0.0.1 - - [17/Feb/2026 22:57:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:44,218 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:44,218 - 127.0.0.1 - - [17/Feb/2026 22:57:44] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:44,263 - 127.0.0.1 - - [17/Feb/2026 22:57:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:44,557 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:44,558 - 127.0.0.1 - - [17/Feb/2026 22:57:44] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:44,624 - 127.0.0.1 - - [17/Feb/2026 22:57:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:44,908 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:44,909 - 127.0.0.1 - - [17/Feb/2026 22:57:44] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:44,954 - 127.0.0.1 - - [17/Feb/2026 22:57:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:45,229 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:45,230 - 127.0.0.1 - - [17/Feb/2026 22:57:45] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:45,283 - 127.0.0.1 - - [17/Feb/2026 22:57:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:45,543 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:45,544 - 127.0.0.1 - - [17/Feb/2026 22:57:45] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:45,592 - 127.0.0.1 - - [17/Feb/2026 22:57:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:45,881 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:45,882 - 127.0.0.1 - - [17/Feb/2026 22:57:45] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:45,934 - 127.0.0.1 - - [17/Feb/2026 22:57:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:46,259 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:46,260 - 127.0.0.1 - - [17/Feb/2026 22:57:46] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:46,296 - 127.0.0.1 - - [17/Feb/2026 22:57:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:46,645 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:46,646 - 127.0.0.1 - - [17/Feb/2026 22:57:46] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:46,707 - 127.0.0.1 - - [17/Feb/2026 22:57:46] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:57:47,083 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:57:47,084 - 127.0.0.1 - - [17/Feb/2026 22:57:47] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:57:47,141 - 127.0.0.1 - - [17/Feb/2026 22:57:47] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:21,083 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:21,083 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:21,123 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:21,379 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:21,380 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:21,431 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:21,653 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:21,654 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:21,690 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:21,963 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:21,964 - 127.0.0.1 - - [17/Feb/2026 22:59:21] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:22,021 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:22,234 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:22,235 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:22,281 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:22,512 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:22,512 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:22,561 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:22,810 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:22,811 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:22,856 - 127.0.0.1 - - [17/Feb/2026 22:59:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:23,066 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:23,067 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:23,115 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:23,346 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:23,346 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:23,396 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:23,630 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:23,630 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:23,681 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:23,928 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:23,929 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:23,965 - 127.0.0.1 - - [17/Feb/2026 22:59:23] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:24,196 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:24,196 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:24,246 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:24,453 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:24,454 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:24,504 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:24,664 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:24,665 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:24,722 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:24,874 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:24,876 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:24,920 - 127.0.0.1 - - [17/Feb/2026 22:59:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:25,051 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:25,051 - 127.0.0.1 - - [17/Feb/2026 22:59:25] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:25,102 - 127.0.0.1 - - [17/Feb/2026 22:59:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:25,301 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:25,303 - 127.0.0.1 - - [17/Feb/2026 22:59:25] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:25,355 - 127.0.0.1 - - [17/Feb/2026 22:59:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-17 22:59:25,463 - 401 UNAUTHORIZED: Invalid Key Attempt.
+2026-02-17 22:59:25,464 - 127.0.0.1 - - [17/Feb/2026 22:59:25] "[31m[1mGET /secret/test HTTP/1.1[0m" 401 -
+2026-02-17 22:59:25,515 - 127.0.0.1 - - [17/Feb/2026 22:59:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
