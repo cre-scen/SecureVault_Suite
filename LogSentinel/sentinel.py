@@ -1,6 +1,15 @@
 import time
 import os
 
+def block_ip(ip_address):
+    """Adds a malicious IP to the blocklist file."""
+    # This path assumes you are running from the LogSentinel folder
+    blocklist_path = "../blocklist.txt"
+    
+    with open(blocklist_path, "a") as f:
+        f.write(f"{ip_address}\n")
+    print(f"[#] SUCCESS: {ip_address} has been added to the blocklist.")
+
 # CONFIGURATION
 LOG_PATH = "../SecureVaultAPI/app.log"
 THRESHOLD = 5
@@ -42,6 +51,7 @@ def monitor():
                     print("\n" + "!" * 40)
                     print("!!! SECURITY ALERT: BRUTE FORCE DETECTED !!!")
                     print("!" * 40 + "\n")
+                    block_ip("127.0.0.1")  # In a real scenario, extract the actual IP from the log
                     # Reset after alert
                     failed_login_count = 0 
                     first_fail_time = None

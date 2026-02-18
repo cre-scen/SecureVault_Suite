@@ -1,13 +1,29 @@
 import sqlite3
-import os 
+import os
 import logging
-from dotenv import load_dotenv 
-from flask import Flask, request, jsonify
-
-logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+from flask import Flask, request, jsonify, abort, render_template
+from dotenv import load_dotenv
 
 load_dotenv()
 app = Flask(__name__)
+
+@app.before_request
+def check_blocklist():
+    # Read the blocklist file
+    try:
+        # We use '../' to look in the folder above this one
+        with open("../blocklist.txt", "r") as f:
+            banned_ips = f.read().splitlines()
+        
+        # Check if the current user's IP is in that list
+        if request.remote_addr in banned_ips:
+            abort(403)
+            
+    except FileNotFoundError:
+        # If the file doesn't exist yet, just keep going
+        pass
+
+logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 VALID_API_KEY = os.getenv('VALID_API_KEY')
 def get_db_connection():
