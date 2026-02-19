@@ -13,7 +13,13 @@ def check_blocklist():
     try:
         # We use '../' to look in the folder above this one
         with open("../blocklist.txt", "r") as f:
-            banned_ips = f.read().splitlines()
+            lines = f.read().splitlines()
+            
+            banned_ips = []
+            for line in lines:
+                ip = line.split(',')[0]  # Extract just the IP address from the line
+                banned_ips.append(ip)
+        
         
         # Check if the current user's IP is in that list
         if request.remote_addr in banned_ips:
