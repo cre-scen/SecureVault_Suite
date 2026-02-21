@@ -1,8 +1,10 @@
 import sqlite3
 import os
 import logging
+from xml.sax import handler
 from flask import Flask, request, jsonify, abort, render_template
 from dotenv import load_dotenv
+from logging.handlers import RotatingFileHandler
 
 load_dotenv()
 app = Flask(__name__)
@@ -29,7 +31,12 @@ def check_blocklist():
         # If the file doesn't exist yet, just keep going
         pass
 
-logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=3))
+logging.basicConfig(
+    handlers=[handler],
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s'
+)
 
 VALID_API_KEY = os.getenv('VALID_API_KEY')
 def get_db_connection():

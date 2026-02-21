@@ -41,15 +41,6 @@ def block_ip(ip_address):
     print(f"[#] TIME: {current_time}")
     print(f"[#] LOCATION: {location}\n")
 
-def block_ip(ip_address):
-    """Adds a malicious IP to the blocklist file."""
-    # This path assumes you are running from the LogSentinel folder
-    blocklist_path = "../blocklist.txt"
-    
-    with open(blocklist_path, "a") as f:
-        f.write(f"{ip_address}\n")
-    print(f"[#] SUCCESS: {ip_address} has been added to the blocklist.")
-
 # CONFIGURATION
 LOG_PATH = "../SecureVaultAPI/app.log"
 THRESHOLD = 5
