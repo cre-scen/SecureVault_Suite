@@ -1,7 +1,6 @@
 import sqlite3
 import os
 import logging
-from xml.sax import handler
 from flask import Flask, request, jsonify, abort, render_template
 from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
@@ -9,12 +8,18 @@ from logging.handlers import RotatingFileHandler
 load_dotenv()
 app = Flask(__name__)
 
+# Paths are resolved relative to this file, so the app works from any directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_PATH = os.path.join(BASE_DIR, "app.log")
+DB_PATH = os.path.join(BASE_DIR, "test_vault.db")
+BLOCKLIST_PATH = os.path.join(os.path.dirname(BASE_DIR), "blocklist.txt")
+
 @app.before_request
 def check_blocklist():
     # Read the blocklist file
     try:
-        # We use '../' to look in the folder above this one
-        with open("../blocklist.txt", "r") as f:
+        # The blocklist lives in the folder above this one
+        with open(BLOCKLIST_PATH, "r") as f:
             lines = f.read().splitlines()
             
             banned_ips = []
@@ -31,7 +36,9 @@ def check_blocklist():
         # If the file doesn't exist yet, just keep going
         pass
 
-logging.basicConfig(handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=3))
+# Root logger setup; Werkzeug's access-log lines (IP + status) also land here,
+# which is what LogSentinel parses
+handler = RotatingFileHandler(LOG_PATH, maxBytes=1_000_000, backupCount=3)
 logging.basicConfig(
     handlers=[handler],
     level=logging.INFO,
@@ -40,7 +47,7 @@ logging.basicConfig(
 
 VALID_API_KEY = os.getenv('VALID_API_KEY')
 def get_db_connection():
-    conn = sqlite3.connect('test_vault.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -53,13 +60,19 @@ def add_secret():
     api_key = request.headers.get('X-API-Key')
     if api_key != VALID_API_KEY:
         return jsonify({"error": "Unauthorized"}), 401 
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     name = data.get('name')
     secret = data.get('secret')
+    if not name or not secret:
+        return jsonify({"error": "Both 'name' and 'secret' are required"}), 400
     conn = get_db_connection()
-    conn.execute('INSERT INTO secrets (name, secret_data) VALUES (?, ?)', (name, secret))
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute('INSERT INTO secrets (name, secret_data) VALUES (?, ?)', (name, secret))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        return jsonify({"error": f"Secret '{name}' already exists"}), 409
+    finally:
+        conn.close()
 
     return {"message": f"Secret '{name}' saved!"}, 201
 
@@ -78,5 +91,7 @@ def get_secret(name):
         return jsonify({"name": name, "secret": secret['secret_data']}), 200
     else:
         return jsonify({"error": "Secret not found"}), 404
-    
-app.run(debug=True) 
+
+
+if __name__ == "__main__":
+    app.run(debug=True) 
