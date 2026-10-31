@@ -5,7 +5,7 @@
 ![SQLite](https://img.shields.io/badge/SQLite-storage-003B57?logo=sqlite&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A compact security "vertical slice" covering both sides of the problem: a **Flask API** that stores secrets behind API-key authentication, and **LogSentinel**, a monitor that detects brute-force attempts against that API and blocks the source IP.
+A compact security "vertical slice" covering both sides of the problem: a **Flask API** that stores secrets **encrypted at rest** behind API-key authentication, and **LogSentinel**, a monitor that detects brute-force attempts against that API and blocks the source IP.
 
 ## Architecture
 
@@ -30,7 +30,7 @@ A compact security "vertical slice" covering both sides of the problem: a **Flas
 
 | Component | Description |
 | :--- | :--- |
-| [`SecureVaultAPI/`](SecureVaultAPI/) | Flask + SQLite secrets API with `X-API-Key` auth and an IP blocklist middleware |
+| [`SecureVaultAPI/`](SecureVaultAPI/) | Flask + SQLite secrets API with encryption at rest, `X-API-Key` auth and an IP blocklist middleware |
 | [`LogSentinel/`](LogSentinel/) | Real-time log monitor, brute-force detection, blocklist and threat reporting |
 | [`docs/`](docs/) | Weekly development retrospectives |
 
@@ -44,8 +44,9 @@ python -m venv venv
 pip install -r requirements.txt
 
 cd SecureVaultAPI
-cp .env.example .env        # then set VALID_API_KEY  (Windows: copy .env.example .env)
-python db_test.py           # creates the database table and a test record
+cp .env.example .env        # then set VALID_API_KEY and VAULT_ENCRYPTION_KEY  (Windows: copy .env.example .env)
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"   # generates VAULT_ENCRYPTION_KEY
+python db_test.py           # creates the table, encrypts any old plaintext rows, adds a test record
 python app.py               # terminal 1: API on http://127.0.0.1:5000
 ```
 
@@ -80,8 +81,8 @@ Expected result:
 ```
 SecureVault_Suite/
 ├── SecureVaultAPI/
-│   ├── app.py            # Flask API, auth, blocklist middleware, logging
-│   ├── db_test.py        # Database setup and smoke test
+│   ├── app.py            # Flask API, encryption, auth, blocklist middleware, logging
+│   ├── db_test.py        # Database setup, plaintext-to-encrypted migration, smoke test
 │   └── .env.example
 ├── LogSentinel/
 │   ├── sentinel.py       # Log tailing and brute-force detection
@@ -97,7 +98,7 @@ Runtime files (`app.log`, `blocklist.txt`, `test_vault.db`, reports) are generat
 
 This is a learning project, not production software:
 
-- Secrets are stored **unencrypted** in SQLite.
+- The encryption key sits in `.env` on the same machine as the database. Production systems keep it in a secrets manager or KMS, and rotate it.
 - There is a single shared API key, with no per-user accounts or key rotation.
 - It runs on Flask's development server with `debug=True`.
 - Blocking is application-level only. A production setup would push blocks to the firewall (e.g. `ufw`, `iptables`) or a WAF.
