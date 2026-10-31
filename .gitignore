@@ -1,0 +1,6 @@
+# Runtime logs (including rotated files)
+app.log
+app.log.*
+
+# Python cache
+__pycache__/
