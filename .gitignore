@@ -1,6 +1,12 @@
-# Runtime logs (including rotated files)
-app.log
-app.log.*
+# Runtime artefacts
+*.log
+*.log.*
+blocklist.txt
+Daily_Security_Report.csv
+*.db
 
-# Python cache
+# Environment
+.env
+venv/
+.venv/
 __pycache__/

@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import hmac
 import logging
 from flask import Flask, request, jsonify, abort, render_template
 from dotenv import load_dotenv
@@ -46,6 +47,16 @@ logging.basicConfig(
 )
 
 VALID_API_KEY = os.getenv('VALID_API_KEY')
+
+
+def api_key_valid():
+    """Constant-time API key check that fails closed if VALID_API_KEY is not set."""
+    if not VALID_API_KEY:
+        return False
+    provided = request.headers.get('X-API-Key', '')
+    return hmac.compare_digest(provided.encode(), VALID_API_KEY.encode())
+
+
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -57,8 +68,7 @@ def home():
 
 @app.route('/add-secret', methods=['POST'])
 def add_secret():
-    api_key = request.headers.get('X-API-Key')
-    if api_key != VALID_API_KEY:
+    if not api_key_valid():
         return jsonify({"error": "Unauthorized"}), 401 
     data = request.get_json(silent=True) or {}
     name = data.get('name')
@@ -78,8 +88,7 @@ def add_secret():
 
 @app.route('/secret/<name>', methods=['GET'])
 def get_secret(name):
-    api_key = request.headers.get('X-API-Key')
-    if api_key != VALID_API_KEY:
+    if not api_key_valid():
         logging.warning(f"401 UNAUTHORIZED: Invalid Key Attempt.")
         return jsonify({"error": "Unauthorized"}), 401
     logging.info(f"200 OK: Secret Successfully Added/Retrieved.")
@@ -94,4 +103,6 @@ def get_secret(name):
 
 
 if __name__ == "__main__":
+    if not VALID_API_KEY:
+        print("[!] VALID_API_KEY is not set; all authenticated requests will be rejected. See .env.example")
     app.run(debug=True) 

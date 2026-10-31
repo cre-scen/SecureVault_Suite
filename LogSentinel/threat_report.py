@@ -2,45 +2,48 @@ import csv
 import os
 from collections import Counter
 
+# Paths are resolved relative to this file, matching sentinel.py and app.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SUITE_DIR = os.path.dirname(BASE_DIR)
+BLOCKLIST_PATH = os.path.join(SUITE_DIR, "blocklist.txt")
+REPORT_PATH = os.path.join(BASE_DIR, "Daily_Security_Report.csv")
+
+
 def generate_report():
     """Reads the blocklist and generates a security summary."""
-    blocklist_path = "../blocklist.txt"
-    
     # Check if the file exists before trying to read it
-    if not os.path.exists(blocklist_path):
+    if not os.path.exists(BLOCKLIST_PATH):
         print("[-] No blocklist found. The perimeter is secure.")
         return
 
     ips = []
     locations = []
 
-    # Open and read the blocklist
-    with open(blocklist_path, "r") as f:
-        lines = f.read().splitlines()
+    # Open and read the blocklist, skipping blank lines
+    with open(BLOCKLIST_PATH, "r") as f:
+        lines = [line for line in f.read().splitlines() if line.strip()]
 
     for line in lines:
-            parts = line.split(",")
-            
-            # This line handles both simple IPs and enriched data
-            ip = parts[0].strip()
-            ips.append(ip)
-            
-            # Only add to locations if the data actually exists
-            if len(parts) >= 3:
-                location = ",".join(parts[2:]).strip()
-                locations.append(location)
-            else:
-                locations.append("Unknown/Local")
+        parts = line.split(",")
 
-    # Count the occurrences of each IP and Location
+        # Handles both simple IPs and enriched (IP,time,location) entries
+        ip = parts[0].strip()
+        ips.append(ip)
+
+        if len(parts) >= 3:
+            location = ",".join(parts[2:]).strip()
+            locations.append(location)
+        else:
+            locations.append("Unknown/Local")
+
     ip_counts = Counter(ips)
     location_counts = Counter(locations)
 
-    # Print the automated report
-    print("\n" + "="*40)
-    print("🛡️  SECUREVAULT THREAT DIGEST  🛡️")
-    print("="*40)
-    
+    # Print the automated report (ASCII only, so it works on any console)
+    print("\n" + "=" * 40)
+    print("   SECUREVAULT THREAT DIGEST")
+    print("=" * 40)
+
     print("\n[+] TOP ATTACKING IPs:")
     for ip, count in ip_counts.most_common(5):
         print(f"    - {ip}: {count} blocks")
@@ -48,23 +51,18 @@ def generate_report():
     print("\n[+] TOP THREAT ORIGINS (GEO-LOCATION):")
     for loc, count in location_counts.most_common(5):
         print(f"    - {loc}: {count} blocks")
-        
-    print("\n" + "="*40 + "\n")
 
- # --- NEW: Export to CSV ---
-    csv_file = "Daily_Security_Report.csv"
-    
-    # We combine the data into a list of rows for the spreadsheet
-    report_data = Counter(ips).most_common()
+    print("\n" + "=" * 40 + "\n")
 
-    with open(csv_file, mode='w', newline='') as f:
+    # Export to CSV
+    with open(REPORT_PATH, mode='w', newline='') as f:
         writer = csv.writer(f)
-        # Write the Header Row
         writer.writerow(["IP Address", "Attack Count"])
-        
-        # Write the Data Rows
-        for ip, count in report_data:
+        for ip, count in ip_counts.most_common():
             writer.writerow([ip, count])
+
+    print(f"[+] Report saved to {REPORT_PATH}")
+
 
 if __name__ == "__main__":
     generate_report()
