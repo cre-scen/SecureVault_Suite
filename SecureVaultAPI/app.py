@@ -5,6 +5,7 @@ import logging
 from flask import Flask, request, jsonify, abort, render_template
 from dotenv import load_dotenv
 from logging.handlers import RotatingFileHandler
+from cryptography.fernet import Fernet, InvalidToken
 
 load_dotenv()
 app = Flask(__name__)
@@ -48,6 +49,13 @@ logging.basicConfig(
 
 VALID_API_KEY = os.getenv('VALID_API_KEY')
 
+# Encryption at rest: secrets are encrypted with Fernet (AES-128-CBC + HMAC-SHA256)
+# before they reach the database. The key lives only in .env, never in the DB.
+ENCRYPTION_KEY = os.getenv('VAULT_ENCRYPTION_KEY')
+if not ENCRYPTION_KEY:
+    raise RuntimeError("VAULT_ENCRYPTION_KEY is not set. See .env.example")
+fernet = Fernet(ENCRYPTION_KEY.encode())
+
 
 def api_key_valid():
     """Constant-time API key check that fails closed if VALID_API_KEY is not set."""
@@ -77,7 +85,8 @@ def add_secret():
         return jsonify({"error": "Both 'name' and 'secret' are required"}), 400
     conn = get_db_connection()
     try:
-        conn.execute('INSERT INTO secrets (name, secret_data) VALUES (?, ?)', (name, secret))
+        encrypted = fernet.encrypt(secret.encode()).decode()
+        conn.execute('INSERT INTO secrets (name, secret_data) VALUES (?, ?)', (name, encrypted))
         conn.commit()
     except sqlite3.IntegrityError:
         return jsonify({"error": f"Secret '{name}' already exists"}), 409
@@ -96,13 +105,20 @@ def get_secret(name):
     secret = conn.execute('SELECT secret_data FROM secrets WHERE name = ?', (name,)).fetchone()
     conn.close()
 
-    if secret:
-        return jsonify({"name": name, "secret": secret['secret_data']}), 200
-    else:
+    if not secret:
         return jsonify({"error": "Secret not found"}), 404
+
+    try:
+        plaintext = fernet.decrypt(secret['secret_data'].encode()).decode()
+    except InvalidToken:
+        # Wrong key, tampered data, or a row stored before encryption was added
+        logging.error(f"DECRYPTION FAILED for secret '{name}'")
+        return jsonify({"error": "Secret could not be decrypted"}), 500
+
+    return jsonify({"name": name, "secret": plaintext}), 200
 
 
 if __name__ == "__main__":
     if not VALID_API_KEY:
         print("[!] VALID_API_KEY is not set; all authenticated requests will be rejected. See .env.example")
-    app.run(debug=True) 
+    app.run(debug=True)
