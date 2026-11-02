@@ -76,6 +76,18 @@ Expected result:
 
 > Testing from your own machine blocks `127.0.0.1`. Delete `blocklist.txt` to reset.
 
+## Running tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q                                  # API, encryption, blocklist and LogSentinel tests
+ruff check .                               # lint
+bandit -r SecureVaultAPI LogSentinel       # static security scan
+pip-audit -r requirements.txt              # known CVEs in dependencies
+```
+
+The tests use a temporary database, log and blocklist (via `VAULT_DB_PATH`, `VAULT_LOG_PATH` and `VAULT_BLOCKLIST_PATH`), so they never touch your real files or `.env`. Known bugs that are scheduled for a fix are recorded as strict `xfail` tests: they show as `x` now, and fail on purpose once fixed, so they get promoted to normal tests. See [PLAN.md](PLAN.md).
+
 ## Project structure
 
 ```
@@ -87,8 +99,12 @@ SecureVault_Suite/
 ├── LogSentinel/
 │   ├── sentinel.py       # Log tailing and brute-force detection
 │   └── threat_report.py  # Threat digest and CSV export
+├── tests/                # pytest suite (conftest, API and LogSentinel tests)
 ├── docs/retrospectives/
-├── requirements.txt
+├── requirements.txt      # pinned runtime dependencies
+├── requirements-dev.txt  # test, lint and scan tools
+├── pyproject.toml        # pytest and ruff config
+├── PLAN.md               # milestones and known issues
 └── LICENSE
 ```
 

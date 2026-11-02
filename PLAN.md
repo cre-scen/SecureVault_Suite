@@ -17,7 +17,7 @@ Each milestone ships with its tests, a security check and a README update before
 - `requirements.txt` has no version pins (M1)
 - No rate limiting beyond LogSentinel's after-the-fact block (M3)
 - `request.remote_addr` will be wrong behind a reverse proxy (M7)
-- Bandit baseline (run 2026-11-02): B201 High `app.py:124` (debug=True); B310 Medium `sentinel.py:40` (urlopen). The URL there is a fixed https address, so B310 is likely a false positive: confirm, then suppress it with a justified `# nosec` (M3)
+- Bandit baseline (run 2026-11-02, line numbers after M1): B201 High `app.py:129` (debug=True); B310 Medium `sentinel.py:41` (urlopen). The URL there is a fixed https address, so B310 is likely a false positive: confirm, then suppress it with a justified `# nosec` (M3)
 
 Found in the 2026-11-02 assessment (verified by running the API):
 - The app never creates its own table. On a fresh DB, `/add-secret` raises an unhandled 500; only `db_test.py` creates the schema (M3)
@@ -30,7 +30,8 @@ Found by reading:
 
 ---
 
-## M1: Test harness and tooling (NEXT)
+## M1: Test harness and tooling (DONE 2026-11-02, pending review)
+Result: 24 passed, 4 strict xfail (known bugs above). ruff clean. bandit: the 2 baseline findings only. pip-audit: no known vulnerabilities. A test run leaves no files in `SecureVaultAPI/`, `LogSentinel/` or the repo root. The detect-and-block loop was re-checked end to end with the real API and LogSentinel processes. `threat_report.py` also got the blocklist override, because it reads the same file.
 - Make `DB_PATH`, `LOG_PATH` and `BLOCKLIST_PATH` overridable via env vars (`VAULT_DB_PATH`, `VAULT_LOG_PATH`, `VAULT_BLOCKLIST_PATH`) in **all three** of `app.py`, `sentinel.py` and `db_test.py`, so the API and LogSentinel can't point at different files. Defaults stay unchanged.
 - Tests build the schema by calling `db_test.main()` on a temp DB, so the schema isn't copied into the tests.
 - The "refuses to start without a key" test runs in a subprocess, because the app raises at import.
@@ -50,7 +51,7 @@ Found by reading:
 
 **Done when:** `pytest -q` passes, running the tests creates or changes no files in `SecureVaultAPI/` or the repo root, ruff passes, bandit and pip-audit output is recorded (findings listed, not fixed), and the README has a "Running tests" section.
 
-## M2: CI pipeline
+## M2: CI pipeline (NEXT)
 - GitHub Actions on push and PR: pytest, ruff, bandit, pip-audit.
 - Actions pinned to commit SHAs. `permissions: contents: read`.
 - `.github/dependabot.yml` for pip and github-actions.

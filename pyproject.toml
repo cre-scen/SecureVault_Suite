@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+xfail_strict = true
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+
+[tool.ruff.lint]
+# Pyflakes, pycodestyle errors, import sorting and flake8-bugbear
+select = ["E", "F", "I", "B"]

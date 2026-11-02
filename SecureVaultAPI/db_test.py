@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 
 # Same database file and .env that app.py use, resolved relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "test_vault.db")
 load_dotenv(os.path.join(BASE_DIR, ".env"))
+# Same env-var override as app.py
+DB_PATH = os.getenv("VAULT_DB_PATH") or os.path.join(BASE_DIR, "test_vault.db")
 
 ENCRYPTION_KEY = os.getenv("VAULT_ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:

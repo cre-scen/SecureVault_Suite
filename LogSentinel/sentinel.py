@@ -1,9 +1,9 @@
-import time
+import ipaddress
+import json
 import os
 import re
-import ipaddress
+import time
 import urllib.request
-import json
 from collections import defaultdict, deque
 from datetime import datetime
 
@@ -11,8 +11,9 @@ from datetime import datetime
 # Paths are resolved relative to this file, so the script works from any directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SUITE_DIR = os.path.dirname(BASE_DIR)
-LOG_PATH = os.path.join(SUITE_DIR, "SecureVaultAPI", "app.log")
-BLOCKLIST_PATH = os.path.join(SUITE_DIR, "blocklist.txt")  # Same file app.py reads
+# Same env-var overrides as app.py, so both sides always use the same files
+LOG_PATH = os.getenv("VAULT_LOG_PATH") or os.path.join(SUITE_DIR, "SecureVaultAPI", "app.log")
+BLOCKLIST_PATH = os.getenv("VAULT_BLOCKLIST_PATH") or os.path.join(SUITE_DIR, "blocklist.txt")
 THRESHOLD = 5
 WINDOW_SECONDS = 60
 
