@@ -19,10 +19,22 @@ Each milestone ships with its tests, a security check and a README update before
 - `request.remote_addr` will be wrong behind a reverse proxy (M7)
 - Bandit baseline (run 2026-11-02): B201 High `app.py:124` (debug=True); B310 Medium `sentinel.py:40` (urlopen). The URL there is a fixed https address, so B310 is likely a false positive: confirm, then suppress it with a justified `# nosec` (M3)
 
+Found in the 2026-11-02 assessment (verified by running the API):
+- The app never creates its own table. On a fresh DB, `/add-secret` raises an unhandled 500; only `db_test.py` creates the schema (M3)
+- No input type checks: `{"secret": 123}` or `{"name": ["a"]}` crash with a 500 (M3)
+- No request size limit (`MAX_CONTENT_LENGTH` unset); a 1 MB secret is accepted (M3)
+
+Found by reading:
+- LogSentinel's regex only matches IPv4 (`sentinel.py:24`), so IPv6 failures are never counted (M3)
+- **Constraint for M3:** once the secret name is logged, it's attacker-controlled text. It must be escaped (no raw newlines), or someone could forge a log line that LogSentinel reads as a 401 from any IP and get that IP blocked
+
 ---
 
 ## M1: Test harness and tooling (NEXT)
-- Make `DB_PATH`, `LOG_PATH` and `BLOCKLIST_PATH` overridable via env vars. Defaults stay unchanged.
+- Make `DB_PATH`, `LOG_PATH` and `BLOCKLIST_PATH` overridable via env vars (`VAULT_DB_PATH`, `VAULT_LOG_PATH`, `VAULT_BLOCKLIST_PATH`) in **all three** of `app.py`, `sentinel.py` and `db_test.py`, so the API and LogSentinel can't point at different files. Defaults stay unchanged.
+- Tests build the schema by calling `db_test.main()` on a temp DB, so the schema isn't copied into the tests.
+- The "refuses to start without a key" test runs in a subprocess, because the app raises at import.
+- Known bugs that M3 will fix are recorded as strict `xfail` tests, so they turn into failures the moment they're fixed and have to be promoted to real tests.
 - Pin `requirements.txt`. Add `requirements-dev.txt` with pytest, ruff, bandit and pip-audit.
 - Add `pyproject.toml` with pytest and ruff config.
 - Add `tests/conftest.py`, which sets a test key and temp paths before importing the app.
