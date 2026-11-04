@@ -131,7 +131,7 @@ This is a learning project, not production software:
 - There is a single shared API key, with no per-user accounts or key rotation.
 - It runs on Flask's development server, bound to `127.0.0.1`. The Werkzeug debugger is off unless you set `VAULT_DEBUG=1`; never do that on a reachable host.
 - The failed-auth rate limit is in-memory and per-process, so it resets on restart.
-- Blocking is application-level only. A production setup would push blocks to the firewall (e.g. `ufw`, `iptables`) or a WAF.
+- Firewall-level blocking (M3b) is set up for the lab box only: LogSentinel pushes each ban into an expiring nftables set through a root-owned helper. See [deploy/firewall/](deploy/firewall/README.md). Anywhere else, blocking is application-level only.
 
 The full threat model, including what is still missing and which milestone adds it, is in [docs/threat-model.md](docs/threat-model.md).
 
