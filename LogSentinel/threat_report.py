@@ -5,8 +5,8 @@ from collections import Counter
 # Paths are resolved relative to this file, matching sentinel.py and app.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SUITE_DIR = os.path.dirname(BASE_DIR)
-BLOCKLIST_PATH = os.path.join(SUITE_DIR, "blocklist.txt")
-REPORT_PATH = os.path.join(BASE_DIR, "Daily_Security_Report.csv")
+BLOCKLIST_PATH = os.getenv("VAULT_BLOCKLIST_PATH") or os.path.join(SUITE_DIR, "blocklist.txt")
+REPORT_PATH = os.getenv("VAULT_REPORT_PATH") or os.path.join(BASE_DIR, "Daily_Security_Report.csv")
 
 
 def generate_report():

@@ -21,7 +21,7 @@ Each milestone ships with its tests, a security check and a README update before
 
 ---
 
-## M1: Test harness and tooling (NEXT)
+## M1: Test harness and tooling (DONE 2026-11-04)
 - Make `DB_PATH`, `LOG_PATH` and `BLOCKLIST_PATH` overridable via env vars. Defaults stay unchanged.
 - Pin `requirements.txt`. Add `requirements-dev.txt` with pytest, ruff, bandit and pip-audit.
 - Add `pyproject.toml` with pytest and ruff config.
@@ -38,7 +38,7 @@ Each milestone ships with its tests, a security check and a README update before
 
 **Done when:** `pytest -q` passes, running the tests creates or changes no files in `SecureVaultAPI/` or the repo root, ruff passes, bandit and pip-audit output is recorded (findings listed, not fixed), and the README has a "Running tests" section.
 
-## M2: CI pipeline
+## M2: CI pipeline (NEXT)
 - GitHub Actions on push and PR: pytest, ruff, bandit, pip-audit.
 - Actions pinned to commit SHAs. `permissions: contents: read`.
 - `.github/dependabot.yml` for pip and github-actions.
