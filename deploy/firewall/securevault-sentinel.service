@@ -1,0 +1,45 @@
+[Unit]
+Description=SecureVault LogSentinel (brute-force detection, firewall bans)
+Documentation=https://github.com/cre-scen/SecureVault_Suite/tree/main/deploy/firewall
+# The ban table must exist before the first ban is pushed
+After=network-online.target securevault-firewall.service
+Wants=securevault-firewall.service
+
+[Service]
+Type=simple
+# A dedicated user with no login and no home: a compromised LogSentinel can't read
+# the vault's .env (Fernet key, API key) or the database, and has no sudo except
+# the ban helper.
+User=securevault-sentinel
+Group=securevault
+# Root-owned copy outside the repo, so this user can't edit its own code.
+# System python in isolated mode (-I): ignores PYTHON* variables and user
+# site-packages. sentinel.py uses only the standard library. -u: unbuffered,
+# so alerts reach the journal straight away.
+ExecStart=/usr/bin/python3 -I -u /opt/securevault/sentinel.py
+# Coupled paths: the API must be started with the same two values.
+Environment=VAULT_LOG_PATH=/var/log/securevault/app.log
+Environment=VAULT_BLOCKLIST_PATH=/var/lib/securevault/blocklist.txt
+Environment=VAULT_FIREWALL_BAN=1
+# /var/lib/securevault, created by systemd as securevault-sentinel:securevault 0750.
+# UMask 0027 makes blocklist.txt 0640, so the API (group securevault) can read it.
+StateDirectory=securevault
+StateDirectoryMode=0750
+UMask=0027
+Restart=on-failure
+RestartSec=5
+
+# Sandboxing. Read-only view of the system, no /home at all, private /tmp.
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+# sudo needs to update its own timestamp records; these paths stay root-owned, so
+# this service's user still can't write there itself. '-' = ignore if missing.
+ReadWritePaths=-/run/sudo-rs -/run/sudo -/var/lib/sudo
+# Deliberately NOT set: NoNewPrivileges=yes, or any option that implies it
+# (SystemCallFilter=, RestrictAddressFamilies=, PrivateDevices=, ProtectKernel*=,
+# MemoryDenyWriteExecute=, ...). It would stop sudo from gaining root, so every
+# firewall ban would fail. tests/test_sentinel_deploy.py enforces this.
+
+[Install]
+WantedBy=multi-user.target
