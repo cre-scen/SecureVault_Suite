@@ -33,7 +33,7 @@ A compact security "vertical slice" covering both sides of the problem: a **Flas
 | :--- | :--- |
 | [`SecureVaultAPI/`](SecureVaultAPI/) | Flask + SQLite secrets API with encryption at rest, `X-API-Key` auth and an IP blocklist middleware |
 | [`LogSentinel/`](LogSentinel/) | Real-time log monitor, brute-force detection, blocklist and threat reporting |
-| [`docs/`](docs/) | Weekly development retrospectives |
+| [`docs/`](docs/) | [Threat model](docs/threat-model.md), [scan results](docs/security-baseline.md), weekly retrospectives |
 
 ## Quick start
 
@@ -62,7 +62,7 @@ python sentinel.py          # terminal 2: starts monitoring app.log
 
 ```bash
 pip install -r requirements-dev.txt   # from the repo root, venv active
-pytest -q                             # 14 tests: auth, CRUD, encryption at rest, tampering, blocklist, startup, LogSentinel regex
+pytest -q                             # 32 tests: auth, CRUD, encryption, tampering, blocklist, audit log, log injection, rate limiting, debug default, LogSentinel
 ruff check .
 bandit -r SecureVaultAPI LogSentinel
 pip-audit -r requirements.txt
@@ -83,7 +83,7 @@ The LogSentinel test starts a real Werkzeug server on a random localhost port, b
 
 Current scan results: [docs/security-baseline.md](docs/security-baseline.md).
 
-CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the above on every PR and every push to `main`, on Python 3.11 and 3.13. Bandit runs against [`.bandit-baseline.json`](.bandit-baseline.json), so the build fails on any *new* finding while the two known ones wait for M3. Dependabot opens weekly update PRs for pip packages and the SHA-pinned actions.
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the above on every PR and every push to `main`, on Python 3.11 and 3.13. Bandit runs against [`.bandit-baseline.json`](.bandit-baseline.json), which is empty since M3, so any finding fails the build. Dependabot opens weekly update PRs for pip packages and the SHA-pinned actions.
 
 ## Demo: simulated brute-force attack
 
@@ -100,6 +100,7 @@ Expected result:
 - The API returns `401` five times.
 - LogSentinel prints `Hit detected from 127.0.0.1. Count: 1/5` … `5/5`, then a **SECURITY ALERT** banner, and blocks the IP.
 - Any further request from that IP returns `403`.
+- If LogSentinel isn't running, the API's own rate limiter answers the 6th attempt within the minute with `429`, even with the right key.
 - `python LogSentinel/threat_report.py` prints a threat digest and writes `Daily_Security_Report.csv`.
 
 > Testing from your own machine blocks `127.0.0.1`. Delete `blocklist.txt` to reset.
@@ -128,8 +129,11 @@ This is a learning project, not production software:
 
 - The encryption key sits in `.env` on the same machine as the database. Production systems keep it in a secrets manager or KMS, and rotate it.
 - There is a single shared API key, with no per-user accounts or key rotation.
-- It runs on Flask's development server with `debug=True`.
+- It runs on Flask's development server, bound to `127.0.0.1`. The Werkzeug debugger is off unless you set `VAULT_DEBUG=1`; never do that on a reachable host.
+- The failed-auth rate limit is in-memory and per-process, so it resets on restart.
 - Blocking is application-level only. A production setup would push blocks to the firewall (e.g. `ufw`, `iptables`) or a WAF.
+
+The full threat model, including what is still missing and which milestone adds it, is in [docs/threat-model.md](docs/threat-model.md).
 
 ## License
 

@@ -46,20 +46,22 @@ Each milestone ships with its tests, a security check and a README update before
 
 **Done when:** a PR shows a green run, and a deliberately failing test turns it red (shown once, then reverted). Then add the README badge.
 
-## M3: Threat model and quick hardening (NEXT)
+## M3: Threat model and quick hardening (DONE 2026-11-04)
 - `docs/threat-model.md`, one page: assets (secrets, Fernet key, API key, logs), trust boundaries, top threats, existing vs missing controls.
 - Make debug mode env-driven and off by default.
 - Fix audit logging: log after the outcome, with client IP, secret name and result, never the secret value. Log `add_secret` too.
 - Rate-limit failed auth per IP, so it's blocked in the app, not only after the fact.
 - Remove B201 and B310 from `.bandit-baseline.json` once they're fixed or justifiably suppressed.
+- Found in M3 review and fixed: log injection through the secret name could forge LogSentinel lines and get any IP blocked. Logged input is now escaped and capped, and LogSentinel's regex is anchored.
 
 **Done when:** each fix has a test, the threat model's "missing controls" maps to M4–M7, and `.bandit-baseline.json` has no entries left.
 
-## M4: Per-user authentication
+## M4: Per-user authentication (NEXT)
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
 - Each secret has an owner. User A cannot read or overwrite user B's secret (IDOR test).
 - A CLI to create a user and issue a key (shown once).
 - A migration path off the single shared key.
+- Validate `name`/`secret` types in `add_secret` (a non-string `secret` currently returns `500`, not `400`).
 
 **Done when:** auth tests, cross-user access tests and migration tests pass, and the README endpoints table is updated.
 
