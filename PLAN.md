@@ -17,7 +17,7 @@ Each milestone ships with its tests, a security check and a README update before
 - `requirements.txt` has no version pins (M1)
 - No rate limiting beyond LogSentinel's after-the-fact block (M3)
 - `request.remote_addr` will be wrong behind a reverse proxy (M7)
-- No host firewall: banned IPs still reach the app and are only refused inside it (M3b)
+- No host firewall: banned IPs still reach the app and are only refused inside it (fixed in M3b)
 - Secret `name` is stored in plaintext, so the metadata shows what the vault holds (backlog: ingest pipeline)
 - Only text secrets are accepted; no file or binary ingest (backlog: ingest pipeline)
 - Bandit baseline (run 2026-11-02): B201 High `app.py:124` (debug=True); B310 Medium `sentinel.py:40` (urlopen). The URL there is a fixed https address, so B310 is likely a false positive: confirm, then suppress it with a justified `# nosec` (M3)
@@ -59,7 +59,7 @@ Each milestone ships with its tests, a security check and a README update before
 
 **Done when:** each fix has a test, the threat model's "missing controls" maps to M4–M7, and `.bandit-baseline.json` has no entries left.
 
-## M3b: Host firewall
+## M3b: Host firewall (DONE 2026-11-04)
 Runs on a lab box (the Chromebook Xubuntu machine or a VirtualBox VM), not on my laptop. Independent of M4–M6, so it can be done before or alongside them.
 - nftables, default-deny inbound. Allow SSH only from my admin IP, and the API port only from the lab subnet: `5000` until M7 adds TLS, then `443` instead. SQLite is a file, so no database port is ever open.
 - Rules live in `deploy/firewall/`, load at boot, and are documented.
@@ -68,6 +68,8 @@ Runs on a lab box (the Chromebook Xubuntu machine or a VirtualBox VM), not on my
 - Bans expire on their own; manual unban is documented.
 
 **Done when:** an nmap scan from another lab VM shows only the allowed ports; a simulated brute force from that VM puts its IP in the set and its next connections are dropped (no HTTP response at all); the ban expires after the timeout; tests show the helper rejects anything that isn't an IP; the threat model is updated.
+
+Done on the Chromebook lab box with a Kali VM as the attacker. Evidence: [docs/m3b-firewall-evidence.md](docs/m3b-firewall-evidence.md). LogSentinel runs as the admin user `cardinal`, not a dedicated account; that is recorded as a residual risk in the threat model.
 
 ## M4: Per-user authentication (NEXT)
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
