@@ -18,11 +18,18 @@ THRESHOLD = 5
 WINDOW_SECONDS = 60
 
 # Matches Werkzeug access-log lines, e.g.
-#   ... - 127.0.0.1 - - [21/Feb/2026 11:36:43] "GET /secret/x HTTP/1.1" 401 -
+#   2026-02-21 11:36:43,512 - 127.0.0.1 - - [21/Feb/2026 11:36:43] "GET /secret/x HTTP/1.1" 401 -
 # Only these lines carry the client IP and the status code, and there is exactly
-# one per request (the app's own "401 UNAUTHORIZED" warning line is ignored so
-# each failed attempt is counted once).
-ACCESS_LOG_RE = re.compile(r'(?P<ip>\d{1,3}(?:\.\d{1,3}){3}) - - \[[^\]]*\] ".*" (?P<status>\d{3}) ')
+# one per request (the app's own "AUDIT ..." lines are ignored so each failed
+# attempt is counted once).
+# The pattern is anchored to the start of the line and to the app's log prefix
+# ('%(asctime)s - ' in app.py: change both together). The IP must therefore be
+# the one Werkzeug wrote from the socket, never text that came from a request
+# (e.g. a secret name), so a client can't get an arbitrary IP blocked.
+ACCESS_LOG_RE = re.compile(
+    r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - '
+    r'(?P<ip>\d{1,3}(?:\.\d{1,3}){3}) - - \[[^\]]*\] ".*" (?P<status>\d{3}) '
+)
 
 
 def get_location(ip):
@@ -35,10 +42,13 @@ def get_location(ip):
         return "Invalid IP"
 
     try:
-        # We use a free public API to lookup the IP
-        url = f"https://ipapi.co/{ip}/json/"
+        # We use a free public API to lookup the IP. The scheme and host are fixed,
+        # and only the normalised form of an already-validated IP is inserted.
+        url = f"https://ipapi.co/{ipaddress.ip_address(ip)}/json/"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
+        # B310 flags urlopen because it also accepts file:// and custom schemes.
+        # That can't happen here: the URL is always https://ipapi.co/<valid IP>/json/.
+        with urllib.request.urlopen(req, timeout=5) as response:  # nosec B310
             data = json.loads(response.read().decode('utf-8'))
 
         city = data.get("city") or "Unknown City"

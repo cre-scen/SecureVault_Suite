@@ -1,45 +1,4 @@
 {
   "errors": [],
-  "results": [
-    {
-      "code": "40         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})\n41         with urllib.request.urlopen(req, timeout=5) as response:\n42             data = json.loads(response.read().decode('utf-8'))\n",
-      "col_offset": 13,
-      "end_col_offset": 51,
-      "filename": "LogSentinel/sentinel.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 22,
-        "link": "https://cwe.mitre.org/data/definitions/22.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.",
-      "line_number": 41,
-      "line_range": [
-        41
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b310-urllib-urlopen",
-      "test_id": "B310",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "127         print(\"[!] VALID_API_KEY is not set; all authenticated requests will be rejected. See .env.example\")\n128     app.run(debug=True)\n",
-      "col_offset": 4,
-      "end_col_offset": 23,
-      "filename": "SecureVaultAPI/app.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 94,
-        "link": "https://cwe.mitre.org/data/definitions/94.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "A Flask app appears to be run with debug=True, which exposes the Werkzeug debugger and allows the execution of arbitrary code.",
-      "line_number": 128,
-      "line_range": [
-        128
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b201_flask_debug_true.html",
-      "test_id": "B201",
-      "test_name": "flask_debug_true"
-    }
-  ]
+  "results": []
 }

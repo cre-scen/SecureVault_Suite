@@ -5,7 +5,7 @@ A real-time log monitor that detects brute-force attempts against the SecureVaul
 ## How it works
 
 - **Tails `app.log`** from the end of the file, so a restart doesn't re-alert on old entries. It reopens the file automatically after log rotation.
-- **Parses Werkzeug access-log lines** with a regex to extract the client IP and HTTP status. Each request is counted exactly once.
+- **Parses Werkzeug access-log lines** with a regex to extract the client IP and HTTP status. Each request is counted exactly once. The regex is anchored to the start of the line, so the IP is always the one Werkzeug took from the connection, never text from the request (e.g. a secret name). That stops an attacker getting an arbitrary IP blocked by injecting a fake log line.
 - **Tracks failures per IP** in a sliding window (`deque` of timestamps): **5 x `401` within 60 seconds** triggers an alert. This separates a person mistyping a key from automated attacks.
 - **Blocks and enriches:** appends `IP,timestamp,location` to `blocklist.txt`. Geolocation comes from ipapi.co with a 5-second timeout and is skipped for private and loopback addresses.
 - **Reports:** `threat_report.py` summarises the top attacking IPs and origins and exports `Daily_Security_Report.csv`.

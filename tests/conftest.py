@@ -48,6 +48,7 @@ def client():
         if os.path.exists(path):
             os.remove(path)
     db_test.main()  # the real schema/init path
+    vault_app.reset_rate_limiter()  # failed-auth counts must not leak between tests
     vault_app.app.config["TESTING"] = True
     with vault_app.app.test_client() as c:
         yield c
