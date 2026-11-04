@@ -17,6 +17,9 @@ Each milestone ships with its tests, a security check and a README update before
 - `requirements.txt` has no version pins (M1)
 - No rate limiting beyond LogSentinel's after-the-fact block (M3)
 - `request.remote_addr` will be wrong behind a reverse proxy (M7)
+- No host firewall; LogSentinel bans are enforced only inside the app (M3)
+- Secret `name` is stored in plaintext, so metadata leaks what the vault holds (M8)
+- Only text secrets are accepted; no file or binary ingest (M8)
 - Bandit baseline (run 2026-11-02): B201 High `app.py:124` (debug=True); B310 Medium `sentinel.py:40` (urlopen). The URL there is a fixed https address, so B310 is likely a false positive: confirm, then suppress it with a justified `# nosec` (M3)
 
 ---
@@ -51,8 +54,10 @@ Each milestone ships with its tests, a security check and a README update before
 - Make debug mode env-driven and off by default.
 - Fix audit logging: log after the outcome, with client IP, secret name and result, never the secret value. Log `add_secret` too.
 - Rate-limit failed auth per IP, so it's blocked in the app, not only after the fact.
+- Host firewall on the lab VM (nftables, or ufw if simpler): default-deny inbound, allow only 443 and SSH from my IP, DB never exposed. Rules saved in `deploy/firewall/` and documented.
+- LogSentinel pushes bans to the firewall (an nftables set), not only `blocklist.txt`, so banned IPs are dropped before they reach the app. Bans expire after a set time.
 
-**Done when:** each fix has a test, and the threat model's "missing controls" maps to M4–M7.
+**Done when:** each fix has a test, a scan from another lab VM shows only the allowed ports open, a simulated brute force gets the source IP dropped at the firewall, and the threat model's "missing controls" maps to M4–M8.
 
 ## M4: Per-user authentication
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
@@ -77,6 +82,22 @@ Each milestone ships with its tests, a security check and a README update before
 - Dockerfile (non-root, gunicorn, debug off), Trivy in CI, correct client IP behind a proxy.
 - Refresh the README demo.
 - Run an independent audit in a fresh session and write it to `docs/security-assessment.md`. Every finding is fixed or documented.
+
+## M8: Data ingest pipeline (text + PDF)
+Starts only after M7. Depends on M4 (owners) and M6 (key rotation).
+- One pipeline for every data type: receive → validate → encrypt → store → audit log → LogSentinel.
+- Types in this milestone: text secrets (existing) and PDF uploads. Nothing else.
+- Validate: size limit, real type checked from file contents (not the name or `Content-Type`), reject before any crypto runs.
+- Encrypt: Fernet for small items; chunked AES-GCM for files so they are never fully in memory.
+- Store: metadata (owner, type, size, key version) in the DB; file contents on disk as encrypted blobs with random names; partial uploads cleaned up.
+- Also encrypt or hash the `name` field so metadata doesn't leak what's stored.
+- Audit log: who, type, size, result. Never content.
+- LogSentinel rules for rejected uploads and unusual volume.
+
+**Done when:** tests cover each validation rejection (oversize, wrong type, renamed file), a large-file round trip, cross-user access to files, key rotation with files present, and the README documents the pipeline with a diagram.
+
+## M9 (candidate, decide after M8)
+More data types (images, structured JSON records, logs) through the same pipeline. Not planned until M8 shows how much one type costs.
 
 ## Out of scope for now
 Frontend, PostgreSQL, FastAPI migration (revisit only if M4 needs it).
