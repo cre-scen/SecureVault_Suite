@@ -13,10 +13,14 @@ Tool versions: bandit 1.9.4, pip-audit 2.10.1, Python 3.13.
 | B201 | High / Medium | `SecureVaultAPI/app.py:128` | `app.run(debug=True)` exposes the Werkzeug debugger, which allows arbitrary code execution if it's reachable | M3: debug off by default, env-driven |
 | B310 | Medium / High | `LogSentinel/sentinel.py:41` | `urlopen` would accept `file://` and custom schemes | M3: the URL is a fixed `https://ipapi.co/...` string with only the IP interpolated, and the IP has already been parsed by `ipaddress`, so it is likely a false positive. Confirm, then suppress with a justified `# nosec B310` |
 
+## In CI
+
+Both findings above are stored in `.bandit-baseline.json`. CI runs `bandit -r SecureVaultAPI LogSentinel -b .bandit-baseline.json`, which exits non-zero only for findings *not* in the baseline (verified: adding a `subprocess.call(..., shell=True)` makes it fail). M3 empties the baseline.
+
 ## pip-audit: `pip-audit -r requirements.txt`
 
 ```
 No known vulnerabilities found
 ```
 
-Covers flask 3.1.3, python-dotenv 1.2.4 and cryptography 50.0.2, plus their resolved dependencies at scan time. Transitive dependencies (e.g. Werkzeug) are not pinned in `requirements.txt`, so a later install can resolve different versions. Re-run this scan in CI (M2).
+Covers flask 3.1.3, python-dotenv 1.2.4 and cryptography 50.0.2, plus their resolved dependencies at scan time. Transitive dependencies (e.g. Werkzeug) are not pinned in `requirements.txt`, so a later install can resolve different versions. CI re-runs this scan on every PR and push to `main` (M2).

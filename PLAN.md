@@ -38,7 +38,7 @@ Each milestone ships with its tests, a security check and a README update before
 
 **Done when:** `pytest -q` passes, running the tests creates or changes no files in `SecureVaultAPI/` or the repo root, ruff passes, bandit and pip-audit output is recorded (findings listed, not fixed), and the README has a "Running tests" section.
 
-## M2: CI pipeline (NEXT)
+## M2: CI pipeline (DONE 2026-11-04)
 - GitHub Actions on push and PR: pytest, ruff, bandit, pip-audit.
 - Actions pinned to commit SHAs. `permissions: contents: read`.
 - `.github/dependabot.yml` for pip and github-actions.
@@ -46,13 +46,14 @@ Each milestone ships with its tests, a security check and a README update before
 
 **Done when:** a PR shows a green run, and a deliberately failing test turns it red (shown once, then reverted). Then add the README badge.
 
-## M3: Threat model and quick hardening
+## M3: Threat model and quick hardening (NEXT)
 - `docs/threat-model.md`, one page: assets (secrets, Fernet key, API key, logs), trust boundaries, top threats, existing vs missing controls.
 - Make debug mode env-driven and off by default.
 - Fix audit logging: log after the outcome, with client IP, secret name and result, never the secret value. Log `add_secret` too.
 - Rate-limit failed auth per IP, so it's blocked in the app, not only after the fact.
+- Remove B201 and B310 from `.bandit-baseline.json` once they're fixed or justifiably suppressed.
 
-**Done when:** each fix has a test, and the threat model's "missing controls" maps to M4–M7.
+**Done when:** each fix has a test, the threat model's "missing controls" maps to M4–M7, and `.bandit-baseline.json` has no entries left.
 
 ## M4: Per-user authentication
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
