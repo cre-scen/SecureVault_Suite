@@ -1,0 +1,4 @@
+# /etc/sudoers.d/securevault  (install with mode 0440, owner root)
+# LogSentinel runs as this user and may ban an IP at the firewall, nothing else.
+# The helper validates its single argument itself (see ban_ip.py).
+cardinal ALL=(root) NOPASSWD: /usr/local/sbin/securevault-ban-ip
