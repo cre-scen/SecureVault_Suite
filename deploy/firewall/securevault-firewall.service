@@ -1,0 +1,17 @@
+[Unit]
+Description=SecureVault nftables ban table (LogSentinel firewall bans)
+Documentation=https://github.com/cre-scen/SecureVault_Suite/tree/main/deploy/firewall
+# Separate table from ufw: safe to load in either order. Don't enable the
+# distro's nftables.service instead: its default config runs "flush ruleset",
+# which would wipe ufw's rules too.
+After=network-pre.target ufw.service
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/nft -f /etc/securevault/securevault.nft
+ExecStop=/usr/sbin/nft delete table inet securevault
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

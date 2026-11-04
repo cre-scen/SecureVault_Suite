@@ -1,0 +1,4 @@
+# /etc/securevault/never-ban
+# One IPv4 address or CIDR per line. The ban helper refuses to ban these,
+# so a forged log line or a fat-fingered key can't lock the admin out.
+192.168.0.101   # admin laptop (reserved in the Tenda router)

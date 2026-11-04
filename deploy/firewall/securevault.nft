@@ -1,0 +1,28 @@
+#!/usr/sbin/nft -f
+# SecureVault ban table (M3b). Loaded at boot by securevault-firewall.service.
+#
+# Lives in its own table so it never fights ufw: ufw keeps the base policy
+# (default-deny inbound, which ports are open to whom), and this table only
+# drops IPs that LogSentinel has banned. The input hook runs at priority -10,
+# before ufw's filter chains (priority 0), so a banned IP is dropped first,
+# including its already-open connections.
+#
+# Bans expire on their own after the set's timeout. Reloading this file
+# clears all current bans (the table is recreated).
+
+# Create-then-delete makes the reload idempotent on any nft version
+table inet securevault
+delete table inet securevault
+
+table inet securevault {
+    set banned_v4 {
+        type ipv4_addr
+        flags timeout
+        timeout 1h
+    }
+
+    chain input {
+        type filter hook input priority -10; policy accept;
+        ip saddr @banned_v4 counter drop comment "LogSentinel bans"
+    }
+}

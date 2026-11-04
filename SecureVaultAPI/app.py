@@ -220,14 +220,20 @@ def get_secret(name):
 
 
 def run_server():
-    """Dev server on localhost only. The Werkzeug debugger allows arbitrary code
-    execution, so it is off unless VAULT_DEBUG is exactly "1"."""
+    """Dev server. Binds to 127.0.0.1 unless VAULT_HOST says otherwise (e.g. the
+    lab box's LAN address, with the host firewall deciding who may connect).
+    The Werkzeug debugger allows arbitrary code execution, so it is off unless
+    VAULT_DEBUG is exactly "1", and it refuses to run on a non-loopback address."""
     if not VALID_API_KEY:
         print("[!] VALID_API_KEY is not set; all authenticated requests will be rejected. See .env.example")
+    host = os.getenv("VAULT_HOST", "127.0.0.1")
+    port = int(os.getenv("VAULT_PORT", "5000"))
     debug = os.getenv("VAULT_DEBUG") == "1"
+    if debug and host not in ("127.0.0.1", "localhost", "::1"):
+        raise SystemExit(f"[-] Refusing to start: VAULT_DEBUG=1 with VAULT_HOST={host} would expose the debugger.")
     if debug:
         print("[!] VAULT_DEBUG=1: the Werkzeug debugger is ON. Never expose this server to a network.")
-    app.run(host="127.0.0.1", port=5000, debug=debug)
+    app.run(host=host, port=port, debug=debug)
 
 
 if __name__ == "__main__":

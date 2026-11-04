@@ -2,6 +2,9 @@ import ipaddress
 import json
 import os
 import re
+
+# subprocess is used only to call the fixed ban helper below (argv list, no shell)
+import subprocess  # nosec B404
 import time
 import urllib.request
 from collections import defaultdict, deque
@@ -16,6 +19,12 @@ LOG_PATH = os.getenv("VAULT_LOG_PATH") or os.path.join(SUITE_DIR, "SecureVaultAP
 BLOCKLIST_PATH = os.getenv("VAULT_BLOCKLIST_PATH") or os.path.join(SUITE_DIR, "blocklist.txt")  # Same file app.py reads
 THRESHOLD = 5
 WINDOW_SECONDS = 60
+
+# Optional (M3b): also drop banned IPs at the host firewall. Off unless
+# VAULT_FIREWALL_BAN=1. LogSentinel never runs as root: it calls this helper
+# through a sudoers rule that allows exactly this one command. See
+# deploy/firewall/README.md. blocklist.txt stays as the app-level fallback.
+BAN_HELPER = "/usr/local/sbin/securevault-ban-ip"
 
 # Matches Werkzeug access-log lines, e.g.
 #   2026-02-21 11:36:43,512 - 127.0.0.1 - - [21/Feb/2026 11:36:43] "GET /secret/x HTTP/1.1" 401 -
@@ -66,6 +75,25 @@ def load_blocked_ips():
         return {line.split(",")[0].strip() for line in f if line.strip()}
 
 
+def firewall_ban(ip_address):
+    """Push a ban to nftables via the root helper. Never raises: if the push
+    fails, the app-level blocklist entry still stands."""
+    if os.getenv("VAULT_FIREWALL_BAN") != "1":
+        return False
+    cmd = ["sudo", "-n", BAN_HELPER, ip_address]  # -n: fail instead of prompting
+    try:
+        # Fixed argv, no shell; the helper validates the IP again as root
+        result = subprocess.run(cmd, check=False, timeout=10)  # nosec B603
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"[!] FIREWALL BAN FAILED for {ip_address}: {e}")
+        return False
+    if result.returncode != 0:
+        print(f"[!] FIREWALL BAN FAILED for {ip_address}: helper exit code {result.returncode}")
+        return False
+    print(f"[#] FIREWALL: {ip_address} dropped at nftables (expires automatically)")
+    return True
+
+
 def block_ip(ip_address):
     """Adds a malicious IP, Time, and Location to the blocklist."""
     # Get the exact current time
@@ -81,6 +109,7 @@ def block_ip(ip_address):
     print(f"\n[#] ACTION TAKEN: {ip_address} BLOCKED!")
     print(f"[#] TIME: {current_time}")
     print(f"[#] LOCATION: {location}\n")
+    firewall_ban(ip_address)
 
 
 def monitor():
