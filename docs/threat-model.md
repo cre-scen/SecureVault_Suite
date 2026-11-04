@@ -16,7 +16,7 @@ Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on
 
 1. **Client → API** (HTTP). Everything in a request is untrusted: path, headers, body, and the secret name.
 2. **API → `app.log` → LogSentinel.** LogSentinel turns log text into blocking decisions, so any request data that reaches the log crosses into a security control.
-3. **LogSentinel → `blocklist.txt` → API.** File-based; anyone with write access to the host can edit it.
+3. **LogSentinel → `blocklist.txt` → API.** File-based; anyone with write access to the host can edit it. Since the M3b follow-up the API and LogSentinel run as different users, sharing only `app.log` (API writes) and `blocklist.txt` (LogSentinel writes) through the `securevault` group.
 4. **LogSentinel → ipapi.co** (outbound HTTPS, optional enrichment). Skipped for private and loopback addresses.
 5. **LogSentinel → sudo → ban helper → nftables** (M3b). The only path from the unprivileged log parser to root. The helper re-validates its one argument, because sudo passes arguments through unchecked.
 6. **LAN → host** (M3b). ufw decides who reaches which port; the nftables ban table runs before it.
@@ -51,7 +51,8 @@ Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on
 
 ## Residual risks accepted at M3b
 
-- **LogSentinel runs as the admin user `cardinal`**, who has full sudo with a password. The sudoers rule limits what it can do *without* a password, but if `sudo` was used in the same terminal session in the last few minutes, the cached credentials let that session run anything. Mitigation in use: start LogSentinel in a fresh session and never run `sudo` there. A dedicated unprivileged account is the proper fix, and needs `app.log` and `blocklist.txt` ownership reworked.
+- **LogSentinel ran as the admin user `cardinal`** during the first live run, so a compromise of it could read `.env` (both keys) and the database, and use cached sudo credentials. **Fixed in the repo** (M3b follow-up): it now runs as `securevault-sentinel` via `securevault-sentinel.service`, with `ProtectHome=yes`, and the sudoers rule names only that user. The shared files moved to `/var/log/securevault/` and `/var/lib/securevault/`. File permissions were tested with stand-in users; the live check on the lab box is still to be done (see PLAN.md).
+- **LogSentinel's user can still write `blocklist.txt`**, so if it's compromised it can block any IP at the app level (and ban any IP but the admin at the firewall, for an hour). It can read `app.log`, which holds secret names. It can't write the log, provided the API is started with `umask 027` as documented.
 - **The API is open to the whole lab subnet** while it runs, on the dev server, with one shared key. Covered by M4 (per-user keys) and M7 (gunicorn, TLS, port `443`).
 - **Bans are IPv4 only** (`banned_v4`), matching LogSentinel's IPv4-only regex. ufw has no IPv6 allow rules, so IPv6 can't reach the API or SSH at all.
 - **Reloading the ban table clears every ban** (restart of `securevault-firewall.service`, or a reboot). `blocklist.txt` still refuses those IPs at the app level.

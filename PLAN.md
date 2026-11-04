@@ -69,7 +69,14 @@ Runs on a lab box (the Chromebook Xubuntu machine or a VirtualBox VM), not on my
 
 **Done when:** an nmap scan from another lab VM shows only the allowed ports; a simulated brute force from that VM puts its IP in the set and its next connections are dropped (no HTTP response at all); the ban expires after the timeout; tests show the helper rejects anything that isn't an IP; the threat model is updated.
 
-Done on the Chromebook lab box with a Kali VM as the attacker. Evidence: [docs/m3b-firewall-evidence.md](docs/m3b-firewall-evidence.md). LogSentinel runs as the admin user `cardinal`, not a dedicated account; that is recorded as a residual risk in the threat model.
+Done on the Chromebook lab box with a Kali VM as the attacker. Evidence: [docs/m3b-firewall-evidence.md](docs/m3b-firewall-evidence.md). LogSentinel ran as the admin user `cardinal` in that run, not a dedicated account.
+
+### M3b follow-up: LogSentinel as its own user (IN PROGRESS)
+- A system user `securevault-sentinel` (no login, no home) runs LogSentinel through `deploy/firewall/securevault-sentinel.service`, sandboxed with `ProtectHome=yes` and `ProtectSystem=strict`, from a root-owned copy in `/opt/securevault/`.
+- The sudoers rule names only that user; `cardinal` loses passwordless access to the helper.
+- `app.log` moves to `/var/log/securevault/` and `blocklist.txt` to `/var/lib/securevault/`, shared through the `securevault` group. The API is started with those paths and `umask 027`.
+
+**Done when:** the static tests in `tests/test_sentinel_deploy.py` pass (done), and on the lab box the "Check the separation" steps in `deploy/firewall/README.md` give the expected results, and a brute force from Kali is banned and dropped with the service running. Then update the threat model's residual risks and the evidence doc.
 
 ## M4: Per-user authentication (NEXT)
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
