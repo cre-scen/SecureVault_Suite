@@ -141,6 +141,7 @@ Limits: unlock attempts are limited (see Limits).
 - TLS at the proxy; switch the M3b firewall rule from `5000` to `443`.
 - Refresh the README demo.
 - Run an independent audit in a fresh session and write it to `docs/security-assessment.md`. Every finding is fixed or documented.
+- Audit check, lockout abuse: someone on the LAN can trigger unlock lockouts on purpose to lock the owner out. Confirm a lockout only blocks unlocking and never touches or deletes data, that LogSentinel bans the IP causing it, and record the remaining denial-of-service risk.
 
 ## M8: Phone as a share source
 The phone holds share 2 as an alternative to the USB drive. Platform TBD (Android or iPhone); the protocol is the same either way. Depends on M6 and M7 (TLS).
@@ -183,6 +184,8 @@ Starting values, to be tuned with tests. Every limit hit is logged and visible t
 | Pairing | Opened only from the Chromebook CLI; QR valid 2 minutes, single use; at most 3 paired devices | M8 |
 | Phone unlock requests | One open challenge at a time, expires in 60 seconds; at most 3 requests per 5 minutes, so the phone can't be spammed with approval prompts | M8 |
 | Uploads | Size limit per file and per user per day | Backlog: ingest pipeline |
+
+Known trade-off: lockouts can be abused to lock the owner out on purpose. Checked in the M7 audit.
 
 ## Backlog (not committed; decide after M9)
 
