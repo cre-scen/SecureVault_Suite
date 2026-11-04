@@ -57,6 +57,31 @@ cd LogSentinel
 python sentinel.py          # terminal 2: starts monitoring app.log
 ```
 
+## Running tests
+
+```bash
+pip install -r requirements-dev.txt   # from the repo root, venv active
+pytest -q                             # 14 tests: auth, CRUD, encryption at rest, tampering, blocklist, startup, LogSentinel regex
+ruff check .
+bandit -r SecureVaultAPI LogSentinel
+pip-audit -r requirements.txt
+```
+
+The tests never touch your real vault: `tests/conftest.py` generates a throwaway API key and Fernet key and points every runtime file at a temp directory through these env vars, which you can also use yourself:
+
+| Variable | Default |
+|---|---|
+| `VAULT_DB_PATH` | `SecureVaultAPI/test_vault.db` |
+| `VAULT_LOG_PATH` | `SecureVaultAPI/app.log` (read by LogSentinel too) |
+| `VAULT_BLOCKLIST_PATH` | `blocklist.txt` in the repo root (read by the API and LogSentinel) |
+| `VAULT_REPORT_PATH` | `LogSentinel/Daily_Security_Report.csv` |
+
+If you override the log or blocklist path, set it the same way for the API and LogSentinel, or the detect-and-block loop breaks.
+
+The LogSentinel test starts a real Werkzeug server on a random localhost port, because the Flask test client doesn't write the access-log lines LogSentinel parses.
+
+Current scan results: [docs/security-baseline.md](docs/security-baseline.md).
+
 ## Demo: simulated brute-force attack
 
 Send five requests with a wrong key within a minute (on Windows use `curl.exe`):

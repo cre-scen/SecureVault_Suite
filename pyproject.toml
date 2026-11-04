@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# No .pytest_cache in the repo root
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = ["venv", ".venv"]
+# Folders that hold local modules, so imports sort as first-party
+src = ["SecureVaultAPI", "LogSentinel", "tests"]
+
+[tool.ruff.lint]
+# Ruff defaults (pyflakes + core pycodestyle errors) plus import order and bugbear.
+# Line length is left to the formatter; it is not enforced as a lint error.
+select = ["E4", "E7", "E9", "F", "I", "B"]
