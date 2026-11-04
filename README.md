@@ -1,5 +1,6 @@
 # SecureVault Suite
 
+[![CI](https://github.com/cre-scen/SecureVault_Suite/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cre-scen/SecureVault_Suite/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-API-000000?logo=flask&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-storage-003B57?logo=sqlite&logoColor=white)
@@ -81,6 +82,8 @@ If you override the log or blocklist path, set it the same way for the API and L
 The LogSentinel test starts a real Werkzeug server on a random localhost port, because the Flask test client doesn't write the access-log lines LogSentinel parses.
 
 Current scan results: [docs/security-baseline.md](docs/security-baseline.md).
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the above on every PR and every push to `main`, on Python 3.11 and 3.13. Bandit runs against [`.bandit-baseline.json`](.bandit-baseline.json), so the build fails on any *new* finding while the two known ones wait for M3. Dependabot opens weekly update PRs for pip packages and the SHA-pinned actions.
 
 ## Demo: simulated brute-force attack
 
