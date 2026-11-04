@@ -35,7 +35,9 @@ Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on
 | T10 | Rate limit is per-process and in-memory, so it resets on restart and isn't shared across workers (D) | Fine for the single-process dev server | Missing → **M7** (gunicorn: shared store or proxy-level limit) |
 | T11 | Credentials sniffed in transit (I) | Localhost only | Missing → **M7** (TLS at the proxy) |
 | T12 | Vulnerable dependency or tampered CI action (T) | Pinned requirements; pip-audit and bandit in CI; actions pinned to SHAs; Dependabot | Mitigated (M1/M2) |
-| T13 | Blocklist DoS via a shared NAT/proxy IP: one attacker locks out everyone behind it (D) | None; blocking is app-level and permanent until `blocklist.txt` is edited | Accepted for now; noted for **M7** |
+| T13 | Blocklist DoS via a shared NAT/proxy IP: one attacker locks out everyone behind it (D) | None; blocking is app-level and permanent until `blocklist.txt` is edited | Partly → **M3b** (firewall bans expire); rest accepted |
+| T14 | Banned or unwanted traffic still reaches the app; any other open port on the host is exposed (D, E) | App-level blocklist and rate limit only | Missing → **M3b** host firewall: default-deny, bans dropped in nftables |
+| T15 | Secret names stored in plaintext reveal what the vault holds (I) | None | Missing → **backlog** (keyed HMAC for lookup, name stored encrypted) |
 
 ## Residual risks accepted at M3
 

@@ -17,6 +17,9 @@ Each milestone ships with its tests, a security check and a README update before
 - `requirements.txt` has no version pins (M1)
 - No rate limiting beyond LogSentinel's after-the-fact block (M3)
 - `request.remote_addr` will be wrong behind a reverse proxy (M7)
+- No host firewall: banned IPs still reach the app and are only refused inside it (M3b)
+- Secret `name` is stored in plaintext, so the metadata shows what the vault holds (backlog: ingest pipeline)
+- Only text secrets are accepted; no file or binary ingest (backlog: ingest pipeline)
 - Bandit baseline (run 2026-11-02): B201 High `app.py:124` (debug=True); B310 Medium `sentinel.py:40` (urlopen). The URL there is a fixed https address, so B310 is likely a false positive: confirm, then suppress it with a justified `# nosec` (M3)
 
 ---
@@ -56,6 +59,16 @@ Each milestone ships with its tests, a security check and a README update before
 
 **Done when:** each fix has a test, the threat model's "missing controls" maps to M4–M7, and `.bandit-baseline.json` has no entries left.
 
+## M3b: Host firewall
+Runs on a lab box (the Chromebook Xubuntu machine or a VirtualBox VM), not on my laptop. Independent of M4–M6, so it can be done before or alongside them.
+- nftables, default-deny inbound. Allow SSH only from my admin IP, and the API port only from the lab subnet: `5000` until M7 adds TLS, then `443` instead. SQLite is a file, so no database port is ever open.
+- Rules live in `deploy/firewall/`, load at boot, and are documented.
+- LogSentinel also pushes each ban into an nftables set with a timeout (e.g. 1 hour), so banned IPs are dropped before they reach Python. `blocklist.txt` stays as the app-level fallback.
+- LogSentinel never runs as root. It calls a small helper (`deploy/firewall/ban-ip`) that validates its one argument is an IP and does nothing else; sudoers allows the LogSentinel user to run only that helper.
+- Bans expire on their own; manual unban is documented.
+
+**Done when:** an nmap scan from another lab VM shows only the allowed ports; a simulated brute force from that VM puts its IP in the set and its next connections are dropped (no HTTP response at all); the ban expires after the timeout; tests show the helper rejects anything that isn't an IP; the threat model is updated.
+
 ## M4: Per-user authentication (NEXT)
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
 - Each secret has an owner. User A cannot read or overwrite user B's secret (IDOR test).
@@ -78,8 +91,27 @@ Each milestone ships with its tests, a security check and a README update before
 
 ## M7: Packaging and final audit
 - Dockerfile (non-root, gunicorn, debug off), Trivy in CI, correct client IP behind a proxy.
+- TLS at the proxy; switch the M3b firewall rule from `5000` to `443`.
 - Refresh the README demo.
 - Run an independent audit in a fresh session and write it to `docs/security-assessment.md`. Every finding is fixed or documented.
+
+## Backlog (not committed; decide after M7)
+
+### Ingest pipeline (text + PDF)
+Depends on M4 (owners) and M6 (key rotation).
+- One pipeline for every type: receive → validate → encrypt → store → audit log → LogSentinel.
+- Types: text secrets (existing) and PDF uploads only.
+- Validate before any crypto runs: size limit, and the real type checked from the file contents, not the name or `Content-Type`.
+- Encrypt: Fernet for small items; chunked AES-GCM for files so they are never fully in memory.
+- Store: metadata (owner, type, size, key version) in the DB; file contents on disk as encrypted blobs with random names; partial uploads cleaned up.
+- Stop storing `name` in plaintext: keep a keyed HMAC of it for lookups (a plain hash can be reversed by guessing common names) and store the name itself encrypted.
+- Audit log: who, type, size, result. Never content.
+- LogSentinel rules for rejected uploads and unusual volume.
+
+Done when: tests cover each rejection (oversize, wrong type, renamed file), a large-file round trip, cross-user access to files, and key rotation with files present; the README documents the pipeline with a diagram.
+
+### More data types
+Images, structured JSON records, logs through the same pipeline. Only after the ingest pipeline shows what one type costs.
 
 ## Out of scope for now
 Frontend, PostgreSQL, FastAPI migration (revisit only if M4 needs it).
