@@ -184,6 +184,8 @@ Starting values, to be tuned with tests. Every limit hit is logged and visible t
 | Pairing | Opened only from the Chromebook CLI; QR valid 2 minutes, single use; at most 3 paired devices | M8 |
 | Phone unlock requests | One open challenge at a time, expires in 60 seconds; at most 3 requests per 5 minutes, so the phone can't be spammed with approval prompts | M8 |
 | Uploads | Size limit per file and per user per day | Backlog: ingest pipeline |
+| Search queries | 30 per minute per key; `k` capped at 20 | Backlog: LLM data store (B2) |
+| Dataset downloads | Signed URL valid 5 minutes for one dataset version; daily download cap per user | Backlog: LLM data store (B3) |
 
 Known trade-off: lockouts can be abused to lock the owner out on purpose. Checked in the M7 audit.
 
@@ -204,6 +206,68 @@ Done when: tests cover each rejection (oversize, wrong type, renamed file), a la
 
 ### More data types
 Images, structured JSON records, logs through the same pipeline. Only after the ingest pipeline shows what one type costs.
+
+### LLM data store (B1–B3)
+A store for LLM learning data, both training datasets and a RAG knowledge base, that developers can retrieve quickly over the internet. Built on the ingest pipeline, M5 (RBAC), M6 (split key) and M7 (packaging and audit). Order: ingest pipeline → B1 → B2 → B3.
+
+Decisions:
+- **Unlock policy: owner-present.** The store serves only while the vault is unlocked (USB or phone share present). When locked, every request gets `503 Locked`, public ones included. There is no always-on key. The alternative, a separate always-on data key, was rejected for now because it means leaving a key on an internet-facing box; revisit only if uptime becomes a requirement.
+- **No object store.** Files stay as encrypted blobs on disk, as in the ingest pipeline. MinIO's community edition is no longer maintained (repository archived April 2026), so it isn't used.
+- **Vector store: sqlite-vec**, so the stack stays on SQLite and PostgreSQL stays out of scope. It is pre-1.0: pin `>=0.1.9` (versions below 0.1.3 have a published advisory) and track it in Dependabot.
+
+```mermaid
+flowchart LR
+  Dev[Developer] -->|HTTPS| CF[Cloudflare Access]
+  CF --> T[cloudflared tunnel<br/>outbound only]
+  T --> API[SecureVault API<br/>API key + RBAC + rate limits]
+  API -->|vault locked| L{{503 Locked}}
+  API --> IP[Ingest pipeline<br/>validate then encrypt]
+  IP --> B[(Encrypted blobs<br/>datasets and docs)]
+  IP --> E[Chunk and embed locally]
+  E --> V[(sqlite-vec index<br/>vectors and ACL)]
+  E --> C[(Encrypted chunk text)]
+  API -->|search| V
+  V --> C
+  API -->|signed URL| B
+  API --> LOG[app.log] --> LS[LogSentinel] --> NFT[nftables ban]
+```
+
+#### B1: Dataset store
+- Types: JSONL, CSV and Parquet, added to the ingest pipeline's checks. The real type is checked from the contents (Parquet `PAR1` magic bytes; JSONL and CSV parsed as a stream with row and column limits), never from the name.
+- Versioned datasets: `name@version`, immutable once published. A new upload is a new version.
+- A manifest per version: SHA-256 of the plaintext, size, row count, owner, uploader, created time and key version. Developers check the hash after download.
+- Endpoints: `POST /datasets` (writer), `GET /datasets` (lists only what the caller's role can read), `GET /datasets/<name>@<version>` (streams decrypted chunks), `GET /datasets/<name>@<version>/manifest`.
+- Downloads decrypt chunk by chunk (AES-GCM), so a large file is never fully in memory.
+- Deletion is admin-only and removes the blob and any index rows built from it.
+
+**Done when:** tests cover version immutability, a hash match after a round trip, a reader trying to upload, cross-user and cross-role access, a large file streaming under a memory cap, and key rotation with datasets present.
+
+#### B2: RAG index
+- Sources: text and PDFs from the ingest pipeline, plus dataset text fields chosen at upload.
+- Chunk with fixed size and overlap (settings recorded per source). Embed locally on the CPU with a small open embedding model, chosen and pinned in this milestone. The model name and version are stored per chunk so re-embedding can be tracked. No external embedding API: data never leaves the box.
+- Store: vectors in a sqlite-vec table with chunk id, owner and access list. Chunk text is encrypted with the current DEK like any secret and decrypted only for results that are returned.
+- Query: `POST /search` with `query` and `k`. Results are filtered by the caller's permissions **before** ranking, so a chunk the caller can't read is never returned, however similar it is. Returns chunk text, source and dataset version.
+- Known risk: vectors are stored unencrypted, because search needs them, and embeddings can be partly turned back into text. The index is treated as sensitive: it sits on the LUKS disk (M3d), is never exported, and vectors never appear in API responses.
+- Poisoning: only the writer role can add sources, and every chunk traces back to its upload in the audit log.
+
+**Done when:** tests show a user can't retrieve chunks they can't read, `k` is capped, vectors never appear in responses, re-embedding works after a model change, and a locked vault returns `503`; query latency measured on the Chromebook is recorded in the README.
+
+#### B3: Public exposure
+Only after an M7-style audit passes with B1 and B2 included.
+- Cloudflare Tunnel: `cloudflared` connects outbound only, so no inbound port is opened and the M3b firewall stays default-deny.
+- Cloudflare Access in front for developer identity, plus the M4 API key. Both are required.
+- Client IP taken from `CF-Connecting-IP` only for requests that arrive through the tunnel (builds on the M7 proxy fix). LogSentinel bans per IP and per key.
+- Tunnel traffic reaches the box from `cloudflared` on localhost, so nftables can't see public client IPs and the M3b drop doesn't apply to them. Public bans happen in the app (by `CF-Connecting-IP`) and are pushed to a Cloudflare IP access rule through a scoped API token; nftables keeps covering the LAN.
+- Dataset downloads through short-lived signed URLs (see Limits).
+- A clear `503 Locked` message when the vault is locked.
+
+**Done when:** an external scan of the home IP shows no open ports; a request without an Access token is refused at Cloudflare; a valid Access login without an API key gets `401`; a quota breach returns `429` and is logged; an expired signed URL is refused; a banned public IP is blocked at Cloudflare; a new section is added to `docs/security-assessment.md`.
+
+Residual risks (record in the threat model):
+- Data is readable in RAM while the vault is unlocked.
+- Vectors are unencrypted on disk, protected only by LUKS and access control.
+- A public endpoint invites scraping and denial of service. Cloudflare absorbs some of it; the Chromebook is weak.
+- The Chromebook's storage and CPU cap dataset size and embedding speed. Fine for learning, not for training-scale data.
 
 ## Out of scope for now
 Frontend, PostgreSQL, FastAPI migration (revisit only if M4 needs it). Running the vault from a USB drive.
