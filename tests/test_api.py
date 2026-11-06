@@ -3,6 +3,8 @@ import sqlite3
 import subprocess
 import sys
 
+import pytest
+
 from conftest import API_DIR, TMP_DIR
 
 
@@ -40,6 +42,30 @@ def test_missing_fields_return_400(client, auth):
     # Not JSON at all
     resp = client.post("/add-secret", data="not json", headers=auth)
     assert resp.status_code == 400
+
+
+@pytest.mark.parametrize("body", [
+    {"name": "ok_name", "secret": 123},
+    {"name": "ok_name", "secret": ["a"]},
+    {"name": "ok_name", "secret": {"a": 1}},
+    {"name": 123, "secret": "value"},
+    {"name": ["a"], "secret": "value"},
+    {"name": "has space", "secret": "value"},
+    {"name": "../etc/passwd", "secret": "value"},
+    {"name": "n" * 129, "secret": "value"},
+    {"name": "ok_name", "secret": "x" * (64 * 1024 + 1)},
+])
+def test_invalid_types_and_values_return_400_not_500(client, auth, body):
+    assert client.post("/add-secret", json=body, headers=auth).status_code == 400
+
+
+def test_json_that_is_not_an_object_returns_400(client, auth):
+    assert client.post("/add-secret", json=["name", "secret"], headers=auth).status_code == 400
+
+
+def test_name_and_secret_at_the_limits_are_accepted(client, auth):
+    assert add(client, auth, name="n" * 128, secret="x" * (64 * 1024)).status_code == 201
+    assert add(client, auth, name="a.b-c_D9", secret="v").status_code == 201
 
 
 # --- Get secret --------------------------------------------------------------

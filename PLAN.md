@@ -10,7 +10,7 @@ M3c and M3d run on the lab box and can slot in between code milestones, but M3d 
 ## Already done
 - Flask API with add/get secret, parameterised SQL, JSON errors (400/401/403/404/409/500)
 - Fernet encryption at rest, plus a plaintext migration in `db_test.py`
-- Constant-time `X-API-Key` check that fails closed
+- Constant-time `X-API-Key` check that fails closed (replaced by per-user keys in M4)
 - LogSentinel: sliding-window brute-force detection, blocklist, CSV threat report
 - README with an architecture diagram, demo and known limitations
 
@@ -79,7 +79,7 @@ Runs on a lab box (the Chromebook Xubuntu machine or a VirtualBox VM), not on my
 
 Done on the Chromebook lab box with a Kali VM as the attacker. Evidence: [docs/m3b-firewall-evidence.md](docs/m3b-firewall-evidence.md). LogSentinel runs as the admin user `cardinal`, not a dedicated account; that is recorded as a residual risk in the threat model.
 
-## M3c: Lab box hardening, part 1 (service isolation and memory)
+## M3c: Lab box hardening, part 1 (service isolation and memory) (NEXT)
 Runs on the Chromebook. Closes the M3b residual risk.
 - Dedicated system users `securevault` and `logsentinel` with no login shell. sudoers for `ban-ip` moves to `logsentinel`.
 - systemd units for both with `NoNewPrivileges=yes`, `ProtectSystem=strict`, `ProtectHome=yes`, `PrivateTmp=yes` and explicit `ReadWritePaths` for the DB, log and blocklist only.
@@ -98,7 +98,7 @@ Must be done before M6 goes live, because the machine share is only protected if
 
 **Done when:** `lsblk -f` shows the root filesystem on a `crypto_LUKS` device; the box won't boot without the passphrase; M3b and M3c checks pass again after the rebuild.
 
-## M4: Per-user authentication (NEXT)
+## M4: Per-user authentication (DONE 2026-11-06)
 - A users table with per-user API keys stored hashed. Decide the scheme in the plan and justify it.
 - Each secret has an owner. User A cannot read or overwrite user B's secret (IDOR test).
 - A CLI to create a user and issue a key (shown once).
@@ -178,8 +178,8 @@ Starting values, to be tuned with tests. Every limit hit is logged and visible t
 | Where | Limit | Milestone |
 |---|---|---|
 | Failed API auth per IP | In-app rate limit, then LogSentinel ban and nftables drop | M3, M3b (done) |
-| Requests per API key | 60 per minute; over that returns `429` | M4 |
-| Failed auth per API key | 10 failures in 10 minutes locks the key until an admin unlocks it | M4 |
+| Requests per API key | 60 per minute; over that returns `429` | M4 (done) |
+| Failed auth per API key | 10 bad secrets in 15 minutes locks the key for 15 minutes, or until `vault_cli.py key unlock` (design D5) | M4 (done) |
 | Unlock attempts | 5 failed in 15 minutes, then locked for 15 minutes, doubling on each repeat | M6 |
 | Pairing | Opened only from the Chromebook CLI; QR valid 2 minutes, single use; at most 3 paired devices | M8 |
 | Phone unlock requests | One open challenge at a time, expires in 60 seconds; at most 3 requests per 5 minutes, so the phone can't be spammed with approval prompts | M8 |

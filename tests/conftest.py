@@ -8,6 +8,8 @@ never used: python-dotenv does not override variables that are already set.
 import os
 import sys
 import tempfile
+from contextlib import closing
+from types import SimpleNamespace
 
 import pytest
 from cryptography.fernet import Fernet
@@ -20,6 +22,8 @@ API_DIR = os.path.join(REPO_ROOT, "SecureVaultAPI")
 SENTINEL_DIR = os.path.join(REPO_ROOT, "LogSentinel")
 
 TMP_DIR = tempfile.mkdtemp(prefix="securevault-tests-")
+# The pre-M4 shared key. Still set in the environment so tests can prove the
+# app ignores it after M4 (decision D4: hard cut).
 TEST_API_KEY = "test-key-" + "x" * 32
 
 os.environ["VALID_API_KEY"] = TEST_API_KEY
@@ -32,8 +36,10 @@ os.environ["VAULT_REPORT_PATH"] = os.path.join(TMP_DIR, "Daily_Security_Report.c
 sys.path.insert(0, API_DIR)
 sys.path.insert(0, SENTINEL_DIR)
 
+import accounts  # noqa: E402
 import app as vault_app  # noqa: E402
 import db_test  # noqa: E402
+import keys  # noqa: E402
 
 
 @pytest.fixture
@@ -55,5 +61,30 @@ def client():
 
 
 @pytest.fixture
-def auth():
-    return {"X-API-Key": TEST_API_KEY}
+def make_user(client):
+    """Create a user with one API key in the test DB; returns its details."""
+
+    def _make(name):
+        with closing(accounts.connect(vault_app.DB_PATH)) as conn:
+            user_id, full_key = accounts.create_user(conn, name)
+        key_id, secret = keys.parse(full_key)
+        return SimpleNamespace(name=name, user_id=user_id, key=full_key, key_id=key_id,
+                               secret=secret, headers={"X-API-Key": full_key})
+
+    return _make
+
+
+@pytest.fixture
+def alice(make_user):
+    return make_user("alice")
+
+
+@pytest.fixture
+def bob(make_user):
+    return make_user("bob")
+
+
+@pytest.fixture
+def auth(alice):
+    """Headers for a valid key. Before M4 this was the shared key; now it's alice's."""
+    return alice.headers
