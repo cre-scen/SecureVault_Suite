@@ -78,12 +78,13 @@ def test_unauthenticated_name_cannot_forge_a_sentinel_line(client, app_module):
     assert VICTIM_IP not in sentinel_401_ips(lines), lines
 
 
-def test_authenticated_decrypt_failure_cannot_forge_a_sentinel_line(client, auth, app_module):
+def test_authenticated_decrypt_failure_cannot_forge_a_sentinel_line(client, alice, auth, app_module):
     import sqlite3
 
     name = "evil" + FORGED
     with sqlite3.connect(app_module.DB_PATH) as conn:
-        conn.execute("INSERT INTO secrets (name, secret_data) VALUES (?, ?)", (name, "not-a-fernet-token"))
+        conn.execute("INSERT INTO secrets (owner_id, name, secret_data) VALUES (?, ?, ?)",
+                     (alice.user_id, name, "not-a-fernet-token"))
     assert client.get("/secret/" + quote(name, safe=""), headers=auth).status_code == 500
     assert VICTIM_IP not in sentinel_401_ips(read_log(app_module))
 
