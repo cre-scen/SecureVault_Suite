@@ -6,7 +6,7 @@
 ![SQLite](https://img.shields.io/badge/SQLite-storage-003B57?logo=sqlite&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A compact security "vertical slice" covering both sides of the problem: a **Flask API** that stores secrets **encrypted at rest** behind API-key authentication, and **LogSentinel**, a monitor that detects brute-force attempts against that API and blocks the source IP.
+A compact security "vertical slice" covering both sides of the problem: a **Flask API** that stores secrets **encrypted at rest** behind per-user API keys, and **LogSentinel**, a monitor that detects brute-force attempts against that API and blocks the source IP.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ A compact security "vertical slice" covering both sides of the problem: a **Flas
 
 | Component | Description |
 | :--- | :--- |
-| [`SecureVaultAPI/`](SecureVaultAPI/) | Flask + SQLite secrets API with encryption at rest, `X-API-Key` auth and an IP blocklist middleware |
+| [`SecureVaultAPI/`](SecureVaultAPI/) | Flask + SQLite secrets API with encryption at rest, per-user hashed API keys, per-owner secrets and an IP blocklist middleware |
 | [`LogSentinel/`](LogSentinel/) | Real-time log monitor, brute-force detection, blocklist and threat reporting |
 | [`docs/`](docs/) | [Threat model](docs/threat-model.md), [scan results](docs/security-baseline.md), weekly retrospectives |
 
@@ -45,11 +45,14 @@ python -m venv venv
 pip install -r requirements.txt
 
 cd SecureVaultAPI
-cp .env.example .env        # then set VALID_API_KEY and VAULT_ENCRYPTION_KEY  (Windows: copy .env.example .env)
+cp .env.example .env        # then set VAULT_ENCRYPTION_KEY  (Windows: copy .env.example .env)
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"   # generates VAULT_ENCRYPTION_KEY
-python db_test.py           # creates the table, encrypts any old plaintext rows, adds a test record
+python db_test.py           # creates the schema, encrypts any old plaintext rows
+python vault_cli.py user create martin   # prints your API key ONCE: store it now
 python app.py               # terminal 1: API on http://127.0.0.1:5000
 ```
+
+Upgrading a vault from before M4? Run `python vault_cli.py migrate --owner martin` instead of `user create`. It backs up the DB, gives every existing secret to that user and prints their first key. The old `VALID_API_KEY` stops working (remove it from `.env`).
 
 In a second terminal (with the virtual environment activated):
 
@@ -62,13 +65,13 @@ python sentinel.py          # terminal 2: starts monitoring app.log
 
 ```bash
 pip install -r requirements-dev.txt   # from the repo root, venv active
-pytest -q                             # 32 tests: auth, CRUD, encryption, tampering, blocklist, audit log, log injection, rate limiting, debug default, LogSentinel
+pytest -q                             # 124 tests: per-user auth, ownership/IDOR, migration, key limits, CLI, validation, encryption, tampering, blocklist, audit log, log injection, rate limiting, debug default, LogSentinel
 ruff check .
 bandit -r SecureVaultAPI LogSentinel
 pip-audit -r requirements.txt
 ```
 
-The tests never touch your real vault: `tests/conftest.py` generates a throwaway API key and Fernet key and points every runtime file at a temp directory through these env vars, which you can also use yourself:
+The tests never touch your real vault: `tests/conftest.py` generates a throwaway Fernet key, creates test users `alice` and `bob` with their own keys, and points every runtime file at a temp directory through these env vars, which you can also use yourself:
 
 | Variable | Default |
 |---|---|
@@ -84,6 +87,32 @@ The LogSentinel test starts a real Werkzeug server on a random localhost port, b
 Current scan results: [docs/security-baseline.md](docs/security-baseline.md).
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the above on every PR and every push to `main`, on Python 3.11 and 3.13. Bandit runs against [`.bandit-baseline.json`](.bandit-baseline.json), which is empty since M3, so any finding fails the build. Dependabot opens weekly update PRs for pip packages and the SHA-pinned actions.
+
+## Authentication and users
+
+Each user has their own API keys, sent in the `X-API-Key` header. A key looks like `sv_<key_id>_<secret>`: the 12-hex `key_id` is public and appears in logs, while the 256-bit secret is shown once at creation and only its SHA-256 hash is stored. Every secret belongs to one user, so nobody can read or overwrite anyone else's.
+
+| Endpoint | Auth | Success | Errors |
+|---|---|---|---|
+| `GET /` | none | `200` health check | `403` blocked IP |
+| `POST /add-secret` `{"name", "secret"}` | key | `201` | `400` bad body (name 1–128 chars `A-Za-z0-9_.-`, secret a string up to 64 KB), `401`, `409` you already have that name, `413` body over 512 KB, `429` |
+| `GET /secret/<name>` | key | `200` `{"name", "secret"}` | `401`, `404` not found *or not yours* (same response), `429`, `500` can't decrypt |
+
+Every authentication failure returns the same `401 {"error": "Unauthorized"}`: missing, malformed, unknown, wrong, revoked, locked, or from a disabled user. The reason is recorded only in the audit log (`reason=`).
+
+Limits: 5 failed attempts per IP in 60 s gives `429` (and LogSentinel bans the IP), 60 requests per key per minute gives `429`, and 10 wrong secrets for one key within 15 minutes, from any IPs, locks that key for 15 minutes.
+
+Manage users and keys with `SecureVaultAPI/vault_cli.py`:
+
+| Command | Does |
+|---|---|
+| `user create NAME` | New user and their first key (shown once) |
+| `user list` | Users, key IDs and status; never secrets or hashes |
+| `user disable NAME` | All their keys stop working immediately |
+| `key issue NAME` | An extra key, for rotating without downtime |
+| `key revoke KEY_ID` | Kill one key for good |
+| `key unlock KEY_ID` | Clear a lockout |
+| `migrate --owner NAME` | Upgrade a pre-M4 database |
 
 ## Demo: simulated brute-force attack
 
@@ -110,8 +139,12 @@ Expected result:
 ```
 SecureVault_Suite/
 ├── SecureVaultAPI/
-│   ├── app.py            # Flask API, encryption, auth, blocklist middleware, logging
-│   ├── db_test.py        # Database setup, plaintext-to-encrypted migration, smoke test
+│   ├── app.py            # Flask API, encryption, auth, limits, blocklist middleware, logging
+│   ├── keys.py           # API key format, generation and hashing
+│   ├── schema.py         # Schema versions and the pre-M4 migration
+│   ├── accounts.py       # User and key management
+│   ├── vault_cli.py      # Admin CLI for users and keys
+│   ├── db_test.py        # Database setup and plaintext-to-encrypted migration
 │   └── .env.example
 ├── LogSentinel/
 │   ├── sentinel.py       # Log tailing and brute-force detection
@@ -128,9 +161,10 @@ Runtime files (`app.log`, `blocklist.txt`, `test_vault.db`, reports) are generat
 This is a learning project, not production software:
 
 - The encryption key sits in `.env` on the same machine as the database. Production systems keep it in a secrets manager or KMS, and rotate it.
-- There is a single shared API key, with no per-user accounts or key rotation.
+- Every user with a key has the same powers; roles come in M5.
+- Anyone who knows a key ID can lock that key with 10 wrong secrets from several IPs. The lock never touches data and expires after 15 minutes (`vault_cli.py key unlock` clears it sooner).
 - It runs on Flask's development server, bound to `127.0.0.1`. The Werkzeug debugger is off unless you set `VAULT_DEBUG=1`; never do that on a reachable host.
-- The failed-auth rate limit is in-memory and per-process, so it resets on restart.
+- The per-IP and per-key request limits are in-memory and per-process, so they reset on restart. Key lockouts are stored in the database and survive restarts.
 - Firewall-level blocking (M3b) is set up for the lab box only: LogSentinel pushes each ban into an expiring nftables set through a root-owned helper. See [deploy/firewall/](deploy/firewall/README.md). Anywhere else, blocking is application-level only.
 
 The full threat model, including what is still missing and which milestone adds it, is in [docs/threat-model.md](docs/threat-model.md).
