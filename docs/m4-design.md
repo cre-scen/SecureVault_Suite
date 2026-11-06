@@ -1,6 +1,6 @@
 # M4: Per-user authentication (design)
 
-Status: **approved 2026-11-06** (decisions D1–D6).
+Status: **approved and built 2026-11-06** (decisions D1–D6). See section 12 for what changed during the build.
 Closes threat T7: "One leaked API key exposes every secret; no per-user boundary."
 Baseline: `pytest -q` on `main` at `d7641de` gives `59 passed` (verified 2026-11-06).
 
@@ -59,9 +59,14 @@ erDiagram
         INTEGER user_id FK
         TEXT key_hash "SHA-256 hex of secret"
         INTEGER revoked "0 or 1"
-        TEXT locked_until "NULL or ISO time"
+        REAL locked_until "NULL or Unix time"
         TEXT created_at
         TEXT last_used_at
+    }
+    api_keys ||--o{ key_failures : counts
+    key_failures {
+        TEXT key_id FK
+        REAL at "Unix time"
     }
     secrets {
         INTEGER id PK
@@ -123,6 +128,7 @@ Every CLI action writes an `AUDIT action=cli_...` line to `app.log`.
 |---|---|
 | `SecureVaultAPI/keys.py` | **New.** Generates, parses and hashes keys |
 | `SecureVaultAPI/schema.py` | **New.** Schema versions and the v0→v1 migration |
+| `SecureVaultAPI/accounts.py` | **New.** User and key operations shared by the CLI, the migration and the tests |
 | `SecureVaultAPI/vault_cli.py` | **New.** The CLI above |
 | `SecureVaultAPI/app.py` | Auth via users/keys, owner filter, validation, per-key limits; audit lines add `user=` and `key=` |
 | `SecureVaultAPI/db_test.py` | Calls `schema.py` instead of its own `CREATE TABLE` |
@@ -154,3 +160,12 @@ These are written first and shown failing, then the code is built to pass them.
 - **The encryption key is still in `.env` next to the DB** (T6) until M3d and M6.
 - **The per-key rate limit is in memory, per process**, the same as the IP limiter. It resets on restart and isn't shared between gunicorn workers (M7).
 - **The CLI trusts whoever can write the DB file.** That's fine on a single-user box, and M3c tightens the file ownership.
+
+## 12. Changes during the build
+
+- **`accounts.py` added.** The migration has to create the owner and their key inside its own transaction, and the CLI needs the same operations. Putting them in `vault_cli.py` would have made `schema.py` import the CLI.
+- **A `key_failures` table** holds the bad-secret timestamps for D5's sliding 15-minute window. A single counter column can't slide.
+- **`locked_until` is Unix time (REAL), not ISO text**, so the lock check is a plain number comparison. Other timestamps stay ISO.
+- **`MAX_CONTENT_LENGTH` is 512 KB**, so oversized bodies get `413` before they're parsed. The 64 KB secret cap still gives `400`.
+- **`db_test.py` no longer inserts the `Drill3_Start` demo row**, because every row now needs an owner. It refuses a pre-M4 database and points to `migrate`.
+- **PLAN.md's limits table said "10 in 10 minutes, until an admin unlocks it"**, which disagreed with the approved D5. The table now matches D5.

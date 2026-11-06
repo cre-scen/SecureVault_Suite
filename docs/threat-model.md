@@ -1,6 +1,6 @@
 # Threat model
 
-Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on the Flask dev server. Written at M3 (2026-11-04); updated at M3b (2026-11-04), when it moved onto the lab box (`192.168.0.103`) behind a host firewall. Method: list the assets, draw the trust boundaries, walk the data flows, and map every threat to a control or to the milestone that adds it.
+Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on the Flask dev server. Written at M3 (2026-11-04); updated at M3b (2026-11-04), when it moved onto the lab box (`192.168.0.103`) behind a host firewall, and at M4 (2026-11-06) for per-user keys. Method: list the assets, draw the trust boundaries, walk the data flows, and map every threat to a control or to the milestone that adds it.
 
 ## Assets
 
@@ -8,7 +8,7 @@ Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on
 |---|---|---|
 | Stored secrets | `test_vault.db`, Fernet-encrypted | The whole point of the vault |
 | Fernet key (`VAULT_ENCRYPTION_KEY`) | `.env`, same host as the DB | Decrypts every secret; losing it loses every secret |
-| API key (`VALID_API_KEY`) | `.env`; sent in `X-API-Key` | Full read/write to every secret |
+| API keys (per user, since M4) | Only a SHA-256 hash in `api_keys`; the key itself is shown once and sent in `X-API-Key` | Read/write to that user's secrets only |
 | `app.log` | `SecureVaultAPI/` | Audit trail, and **LogSentinel's only input** |
 | `blocklist.txt` | Repo root | Decides who is refused; corrupting it is a DoS |
 
@@ -31,7 +31,7 @@ Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on
 | T4 | Audit gaps / repudiation (R) | One `AUDIT` line per decision (IP, action, name, result), written after the outcome; adds and failures included; never the value | **Fixed (M3)** |
 | T5 | Stolen DB file (I) | Fernet (AES-128-CBC + HMAC-SHA256); tampering returns `500`, never data | Mitigated |
 | T6 | Key and DB stolen together from the host (I) | None: the key sits in `.env` next to the DB | Missing → **M6** (rotation, backup) and secrets manager (out of scope) |
-| T7 | One leaked API key exposes every secret; no per-user boundary (E) | None | Missing → **M4** per-user hashed keys + ownership/IDOR tests, **M5** RBAC |
+| T7 | One leaked API key exposes every secret; no per-user boundary (E) | Per-user keys, stored as SHA-256 hashes; every query filtered by owner, so another user's secret is a `404`; revoke/disable via CLI; 60 req/min per key; 10 bad secrets in 15 min lock the key. IDOR, migration and limit tests in `tests/` | **Fixed (M4)**. Roles still missing → **M5** |
 | T8 | Key compromise with no way to rotate (I) | None | Missing → **M6** `MultiFernet` rotation |
 | T9 | Wrong client IP behind a reverse proxy, so the blocklist and rate limit hit the proxy (S, D) | Not deployed behind a proxy | Missing → **M7** |
 | T10 | Rate limit is per-process and in-memory, so it resets on restart and isn't shared across workers (D) | Fine for the single-process dev server | Missing → **M7** (gunicorn: shared store or proxy-level limit) |
@@ -47,12 +47,18 @@ Scope: SecureVault API + LogSentinel as shipped in this repo, run on one host on
 - **Rate-limit lockout:** a legitimate user on an attacker's IP is locked out for up to 60 seconds. This is deliberate; the alternative leaks whether a guess was right.
 - **Secret names are logged** (escaped). Names should not themselves be sensitive.
 - **IPv4 only:** LogSentinel's regex ignores IPv6 clients, so they are rate-limited by the API but never blocklisted.
-- `add_secret` assumes `name` and `secret` are strings; a non-string `secret` raises a `500` instead of a `400`. Low impact (needs a valid key); fold into M4's input validation.
+- ~~`add_secret` assumes `name` and `secret` are strings; a non-string `secret` raises a `500` instead of a `400`.~~ Fixed in M4: types, name format and a 64 KB size cap are validated, and bodies over 512 KB get `413`.
 
 ## Residual risks accepted at M3b
 
 - **LogSentinel runs as the admin user `cardinal`**, who has full sudo with a password. The sudoers rule limits what it can do *without* a password, but if `sudo` was used in the same terminal session in the last few minutes, the cached credentials let that session run anything. Mitigation in use: start LogSentinel in a fresh session and never run `sudo` there. A dedicated unprivileged account is the proper fix, and needs `app.log` and `blocklist.txt` ownership reworked.
-- **The API is open to the whole lab subnet** while it runs, on the dev server, with one shared key. Covered by M4 (per-user keys) and M7 (gunicorn, TLS, port `443`).
+- **The API is open to the whole lab subnet** while it runs, on the dev server. Per-user keys are in place since M4; M7 adds gunicorn, TLS and port `443`.
 - **Bans are IPv4 only** (`banned_v4`), matching LogSentinel's IPv4-only regex. ufw has no IPv6 allow rules, so IPv6 can't reach the API or SSH at all.
 - **Reloading the ban table clears every ban** (restart of `securevault-firewall.service`, or a reboot). `blocklist.txt` still refuses those IPs at the app level.
 - **SSH access depends on the admin laptop's DHCP reservation.** If its address changes (different adapter, replaced Wi-Fi card), SSH is refused; the fallback is the lab box's own console.
+
+## Residual risks accepted at M4
+
+- **Key lockout as denial of service.** Anyone who learns a key ID (it appears in logs) can lock that key with 10 wrong secrets spread over several IPs. The lock only blocks authentication, never touches data, and expires after 15 minutes. Checked again in the M7 audit.
+- **Per-key request rate is in memory,** like the IP limiter (T10): it resets on restart and isn't shared between workers.
+- **The CLI trusts whoever can write the DB file.** Fine on a single-user box; M3c gives the DB to the `securevault` user only.
